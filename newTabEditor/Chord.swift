@@ -7,3 +7,8 @@
 //
 
 import Foundation
+
+class Chord {
+    var mainNote: String = String()
+    var Note: [String] = [String]()
+}

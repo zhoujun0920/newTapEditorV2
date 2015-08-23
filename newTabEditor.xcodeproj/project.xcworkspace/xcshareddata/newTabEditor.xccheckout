@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>0A80AD21-71D2-4638-8416-DC9B730DA7E6</string>
+	<key>IDESourceControlProjectName</key>
+	<string>newTabEditor</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>E0A4A59B738DDA8E443B52BD4A449E18D1DC79C1</key>
+		<string>http://github.com/zhoujun0920/newTapEditor.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>newTabEditor.xcodeproj</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>E0A4A59B738DDA8E443B52BD4A449E18D1DC79C1</key>
+		<string>../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>http://github.com/zhoujun0920/newTapEditor.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>E0A4A59B738DDA8E443B52BD4A449E18D1DC79C1</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>E0A4A59B738DDA8E443B52BD4A449E18D1DC79C1</string>
+			<key>IDESourceControlWCCName</key>
+			<string>newTabEditor%202</string>
+		</dict>
+	</array>
+</dict>
+</plist>

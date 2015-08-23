@@ -9,6 +9,7 @@
 import Foundation
 import CoreData
 
+@objc(Position)
 class Position: NSManagedObject {
 
     @NSManaged var index: NSNumber

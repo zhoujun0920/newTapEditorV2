@@ -9,9 +9,10 @@
 import Foundation
 import CoreData
 
+@objc(Tab)
 class Tab: NSManagedObject {
 
-    @NSManaged var indexID: NSNumber
+    @NSManaged var index: NSNumber
     @NSManaged var tab_name: String
     @NSManaged var tab_content: AnyObject
     @NSManaged var tabAtPosition: Position
