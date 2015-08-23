@@ -463,13 +463,16 @@ class ViewController: UIViewController{
             println("press Back Button")
             self.view.addSubview(self.previousButton)
             self.fretLabelView.frame = CGRectMake(0, 0.375 * trueHeight, self.scrollView.contentSize.width, 0.05 * self.trueHeight)
+            self.fretLabelView.alpha = 0
             removeObjectOnEditView()
             removeStringView("stringViewEdit")
             UIView.animateWithDuration(0.3, animations: {
+                self.fretLabelView.alpha = 1
                 self.scrollView.frame = CGRectMake(0, self.trueHeight, self.trueWidth, -0.425 * self.trueHeight)
                 self.editView.frame = CGRectMake(0, 0.08 * self.trueHeight, self.trueWidth, 0)
                 self.guitarImage.frame = CGRectMake(0, 0, self.scrollView.contentSize.width, 0.75 * self.trueHeight)
                 self.previousButton.alpha = 1
+                self.guitar3StringImage.alpha = 1
             })
             self.guitar3StringImage.frame = CGRectMake(0, 0, self.scrollView.contentSize.width, 0.375 * self.trueHeight)
         }
@@ -491,6 +494,7 @@ class ViewController: UIViewController{
         self.previousButton.removeFromSuperview()
         self.previousButton.alpha = 0
         UIView.animateWithDuration(0.3, animations: {
+            self.guitar3StringImage.alpha = 0
             self.scrollView.frame = CGRectMake(0, 0.2 * self.trueHeight, self.trueWidth, 0.8 * self.trueHeight)
             self.editView.frame = CGRectMake(0, 0.08 * self.trueHeight, self.trueWidth, 0.02 * self.trueHeight)
             self.guitarImage.frame = CGRectMake(0, 0, self.scrollView.contentSize.width, 0.75 * self.trueHeight)
