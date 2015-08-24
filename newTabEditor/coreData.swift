@@ -23,11 +23,11 @@ class coreData: NSObject  {
     func initfingersString() -> [String: String] {
         var fingersString: [String: String] = [String: String]()
         //4th string
-        fingersString["4000"] = "xx0232"
-        fingersString["4030"] = "xx3211"
-        fingersString["4001"] = "xx0231"
-        fingersString["4002"] = "xx0212"
-        fingersString["4003"] = "xx0211"
+        fingersString["40000"] = "xxxx00020302"
+        fingersString["40300"] = "xxxx03020101"
+        fingersString["40001"] = "xxxx00020301"
+        fingersString["40002"] = "xxxx00020102"
+        fingersString["40003"] = "xxxx00020101"
         
         //5th string
         for var i = 0; i < 4; i++ {
@@ -35,16 +35,44 @@ class coreData: NSObject  {
                 var t: String = String()
                 if i == 0 {
                     if j == 3 {
-                        fingersString["5030"] = "x32010"
+                        fingersString["50300"] = "xx0302000100"
                     } else {
-                        fingersString["\(500 + j)0"] = "x\(j)\(j + 2)\(j + 2)\(j + 2)\(j)"
+                        if j < 8 {
+                            fingersString["\(500 + j)00"] = "xx0\(j)0\(j + 2)0\(j + 2)0\(j + 2)0\(j)"
+                        } else j >= 8 && j < 10 {
+                            fingersString["\(500 + j)00"] = "xx0\(j)\(j + 2)\(j + 2)\(j + 2)0\(j)"
+                        } else {
+                            fingersString["\(500 + j)00"] = "xx\(j)\(j + 2)\(j + 2)\(j + 2)\(j)"
+                        }
                     }
                 } else if i == 1 {
-                    fingersString["\(500 + j)1"] = "x\(j)\(j + 2)\(j + 2)\(j + 1)\(j)"
+                    if j < 8 {
+                        fingersString["\(500 + j)01"] = "xx0\(j)0\(j + 2)0\(j + 2)0\(j + 1)0\(j)"
+                    } else if j == 8 {
+                        fingersString["\(500 + j)01"] = "xx0\(j)\(j + 2)\(j + 2)0\(j + 1)0\(j)"
+                    } else if j == 9 {
+                        fingersString["\(500 + j)01"] = "xx0\(j)\(j + 2)\(j + 2)\(j + 1)0\(j)"
+                    }else {
+                        fingersString["\(500 + j)01"] = "xx\(j)\(j + 2)\(j + 2)\(j + 1)\(j)"
+                    }
                 } else if i == 2 {
-                    fingersString["\(500 + j)2"] = "x\(j)\(j + 2)\(j)\(j + 2)\(j)"
+                    if j < 8 {
+                        fingersString["\(500 + j)02"] = "xx0\(j)0\(j + 2)0\(j)0\(j + 2)0\(j)"
+                    } else if j >= 8 && j < 10 {
+                        fingersString["\(500 + j)02"] = "xx0\(j)\(j + 2)0\(j)\(j + 2)0\(j)"
+                    } else {
+                        fingersString["\(500 + j)02"] = "xx\(j)\(j + 2)\(j)\(j + 2)\(j)"
+                    }
                 } else if i == 3 {
-                    fingersString["\(500 + j)3"] = "x\(j)\(j + 2)\(j)\(j + 1)\(j)"
+                    if j < 8 {
+                        fingersString["\(500 + j)03"] = "xx0\(j)0\(j + 2)0\(j)0\(j + 1)0\(j)"
+                    } else if j == 8 {
+                        fingersString["\(500 + j)03"] = "xx0\(j)\(j + 2)0\(j)0\(j + 1)0\(j)"
+                    } else if j == 9 {
+                        fingersString["\(500 + j)03"] = "xx0\(j)\(j + 2)0\(j)\(j + 1)0\(j)"
+                    } else {
+                        fingersString["\(500 + j)03"] = "xx\(j)\(j + 2)\(j)\(j + 1)\(j)"
+                    }
                 }
                 
             }
@@ -56,21 +84,43 @@ class coreData: NSObject  {
             for var j = 0; j < 25; j++ {
                 if i == 0 {
                     if j == 3 {
-                        fingersString["6030"] = "320003"
+                        fingersString["60300"] = "030200000003"
                     } else {
-                        fingersString["\(600 + j)0"] = "x\(j)\(j + 2)\(j + 2)\(j + 1)\(j)\(j)"
+                        if j < 8 {
+                            fingersString["\(600 + j)00"] = "xx0\(j)0\(j + 2)0\(j + 2)0\(j + 1)0\(j)0\(j)"
+                        } else if j == 8 {
+                            fingersString["\(600 + j)00"] = "xx0\(j)\(j + 2)\(j + 2)0\(j + 1)0\(j)0\(j)"
+                        } else if j == 9 {
+                            fingersString["\(600 + j)00"] = "xx0\(j)\(j + 2)\(j + 2)\(j + 1)0\(j)0\(j)"
+                        }else {
+                            fingersString["\(600 + j)00"] = "xx\(j)\(j + 2)\(j + 2)\(j + 1)\(j)\(j)"
+                        }
                     }
                 } else if i == 1 {
-                    fingersString["\(600 + j)1"] = "x\(j)\(j + 2)\(j + 2)\(j)\(j)\(j)"
+                    if j < 8 {
+                        fingersString["\(600 + j)01"] = "xx0\(j)0\(j + 2)0\(j + 2)0\(j)0\(j)0\(j)"
+                    } else if j >= 8 && j < 10 {
+                        fingersString["\(600 + j)01"] = "xx0\(j)\(j + 2)\(j + 2)0\(j)0\(j)0\(j)"
+                    } else {
+                        fingersString["\(600 + j)01"] = "xx\(j)\(j + 2)\(j + 2)\(j)\(j)\(j)"
+                    }
                 } else if i == 2 {
                     if j == 3 {
-                        fingersString["6032"] = "3x0001"
+                        fingersString["60302"] = "03xx00000001"
                     }
-                    fingersString["\(600 + j)2"] = "\(j)\(j + 2)\(j)\(j + 1)\(j)\(j)"
+                    if j < 8 {
+                        fingersString["\(600 + j)02"] = "0\(j)0\(j + 2)0\(j)0\(j + 1)0\(j)0\(j)"
+                    } else if j == 8 {
+                        fingersString["\(600 + j)02"] = "0\(j)\(j + 2)0\(j)0\(j + 1)0\(j)0\(j)"
+                    } else if j == 9 {
+                        fingersString["\(600 + j)02"] = "0\(j)\(j + 2)0\(j)\(j + 1)0\(j)0\(j)"
+                    }else {
+                        fingersString["\(600 + j)02"] = "\(j)\(j + 2)\(j)\(j + 1)\(j)\(j)"
+                    }
                 }
             }
         }
-        fingersString["6003"] = "022030"
+        fingersString["60003"] = "000202000300"
         return fingersString
     }
     
@@ -88,7 +138,7 @@ class coreData: NSObject  {
             for var i = 1; i < 7; i++ {
                 for var j = 0; j < 25; j++ {
                     var count: NSArray = SwiftCoreDataHelper.fetchEntities(NSStringFromClass(Tabs), withPredicate: nil, managedObjectContext: moc)
-                    var index = NSNumber(integer: i * 1000 + j * 10)
+                    var index = NSNumber(integer: i * 10000 + j * 100)
                     var note = fretsBoard[i - 1][j]
                     println("\(note)")
                     insertInitialTabs(index, name: note, dict: dict)
@@ -98,7 +148,7 @@ class coreData: NSObject  {
     }
     
     func insertInitialTabs(index: NSNumber, name: String, dict: Dictionary<String, String>) {
-        if Int(index) < 4000 {
+        if Int(index) < 40000 {
             var tab: Tabs = SwiftCoreDataHelper.insertManagedObject(NSStringFromClass(Tabs), managedObjectConect: moc) as! Tabs
             tab.name = name
             tab.index = index

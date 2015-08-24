@@ -159,7 +159,7 @@ class ViewController: UIViewController{
             self.newTabAvaliable.alpha = 0
             self.newTabAvaliable.setOn(false, animated: true)
             self.newTabAvaliable.alpha = 0
-            self.existTabScrollView.frame = CGRectMake(0, 0.09 * self.trueHeight, 0.81 * self.trueWidth, 0.1 * self.trueHeight)
+            self.existTabScrollView.frame = CGRectMake(0, 0.09 * self.trueHeight, 0.55 * self.trueWidth, 0.1 * self.trueHeight)
             self.existTabScrollView.contentSize = CGSizeMake(1 * self.trueWidth, 0.1 * self.trueHeight)
             self.existTabScrollView.backgroundColor = UIColor.brownColor().colorWithAlphaComponent(0.6)
             self.existTabScrollView.alpha = 0
@@ -360,8 +360,6 @@ class ViewController: UIViewController{
         }
     }
     
-    // record the frets position on fretsPosition: [CGFloat]
-    
     func scrollViewSingleTapped(sender: UITapGestureRecognizer) {
         if self.editAvaliable == true {
             let location = sender.locationInView(self.scrollView)
@@ -380,14 +378,17 @@ class ViewController: UIViewController{
                     choosedNote.x = CGFloat(stringViewEdit[index].tag)
                     if choosedNote.x > 2 {
                        //createNoteButton(FretsBoard.fretsBoard[Int(choosedNote.x)][Int(choosedNote.y)], position: choosedNote)
-                        var temp = Int((choosedNote.x + 1) * 1000 + choosedNote.y * 10)
+                        var temp = Int((choosedNote.x + 1) * 10000 + choosedNote.y * 100)
                         var indexPosition = NSNumber(integer: temp)
                         var dict: NSDictionary = core.getExistTab(indexPosition)
                         var note = dict.objectForKey("name") as! String
                         createNoteButton(note, position: choosedNote)
+                        removeSpecificNoteButton()
+                        addSpecificNoteButton(indexPosition)
                     }
                     else {
-                        //self.editViewTempNoteButton.removeFromSuperview()
+                        self.editViewTempNoteButton.removeFromSuperview()
+                        removeSpecificNoteButton()
                     }
                     println("\(FretsBoard.fretsBoard[Int(choosedNote.x)][Int(choosedNote.y)])")
                     break
@@ -397,24 +398,77 @@ class ViewController: UIViewController{
         }
     }
     
-    func createFingerPoint(sender: CGPoint) {
-        if self.editAvaliable == true {
-            var noteName = FretsBoard.fretsBoard[Int(sender.x)][Int(sender.y)]
-            for var index = 0; index < 6; index++ {
-                
+    
+    func removeSpecificNoteButton() {
+        for view in self.existTabScrollView.subviews {
+            view.removeFromSuperview()
+        }
+    }
+    
+    func addSpecificNoteButton(index: NSNumber) {
+        for var i = 0; i < 25; i++ {
+            var dict: NSDictionary = core.getExistTab(NSNumber(integer: (Int(index) + i)))
+            if dict.count > 0 {
+                if dict.objectForKey("content") as! String != "" {
+                    var buttonWidth = 0.08 * self.trueHeight
+                    var tempButton: UIButton = UIButton()
+                    tempButton.frame = CGRectMake(CGFloat(i) * (buttonWidth + 5) * 1.5, 0.01 * self.trueHeight, buttonWidth * 1.5, buttonWidth)
+                    tempButton.setTitle(dict.objectForKey("name") as? String, forState: UIControlState.Normal)
+                    tempButton.layer.cornerRadius = 3
+                    tempButton.backgroundColor = UIColor.blackColor().colorWithAlphaComponent(0.6)
+                    tempButton.setTitleColor(UIColor.whiteColor(), forState: UIControlState.Normal)
+                    tempButton.tag = Int((dict.objectForKey("index") as! NSNumber))
+                    tempButton.addTarget(self, action: "pressSpecificNoteButton:", forControlEvents: UIControlEvents.TouchUpInside)
+                    self.existTabScrollView.addSubview(tempButton)
+                }
             }
         }
     }
     
-    func addSpecificNoteButton(sender: String, count: Int) {
+    func pressSpecificNoteButton(sender: UIButton) {
+        if self.fingerPoint.count > 0 {
+            for item in fingerPoint {
+                item.removeFromSuperview()
+            }
+        }
+        println("press specific note button")
+        var index = sender.tag as NSNumber
+        var dict = core.getExistTab(index)
+        var content = dict.objectForKey("content") as! String
+        addFingerPrint(index, content: content)
+    }
+    
+    func addFingerPrint(index: NSNumber, content: String) {
+        var stringNumber = Int(index) / 10000
         var buttonWidth = 0.08 * self.trueHeight
-        var tempButton: UIButton = UIButton()
-        tempButton.frame = CGRectMake(CGFloat(count) * (buttonWidth + 5) * 1.5, 0.01 * self.trueHeight, buttonWidth * 1.5, buttonWidth)
-        tempButton.setTitle(sender, forState: UIControlState.Normal)
-        tempButton.layer.cornerRadius = 3
-        tempButton.backgroundColor = UIColor.blackColor().colorWithAlphaComponent(0.6)
-        tempButton.setTitleColor(UIColor.whiteColor(), forState: UIControlState.Normal)
-        self.existTabScrollView.addSubview(tempButton)
+        var buttonX = fretsLocation[1] - buttonWidth / 2
+        var buttonY = stringViewEdit[5].center.y - buttonWidth / 2
+        for var i = 5; i >= 0; i-- {
+            var charAtIndex = content[advance(content.startIndex, 5 - i)]
+            var fingerButton: UIButton = UIButton()
+            var image: UIImage = UIImage()
+            if charAtIndex == "x" {
+                buttonX = fretsLocation[1] - buttonWidth / 2
+                image = UIImage(named: "blackX")!
+            } else {
+                var temp = String(charAtIndex).toInt()
+                image = UIImage(named: "grayButton")!
+                buttonX = fretsLocation[temp! + 1] - buttonWidth / 2
+                buttonY = stringViewEdit[i].center.y - buttonWidth / 2
+            }
+            if i != stringNumber - 1 {
+                fingerButton.frame = CGRectMake(buttonX, buttonY, buttonWidth, buttonWidth)
+                fingerButton.setBackgroundImage(image, forState: UIControlState.Normal)
+                fingerButton.addTarget(self, action: "pressFingerButton", forControlEvents: UIControlEvents.TouchUpInside)
+                fingerPoint.append(fingerButton)
+                self.scrollView.addSubview(fingerButton)
+            }
+            
+        }
+    }
+    
+    func pressFingerButton(sender: UIButton) {
+        println("press finger button")
     }
     
     func createNoteButton(name: String, position: CGPoint) {
@@ -438,7 +492,8 @@ class ViewController: UIViewController{
     }
     
     func pressEditViewTempNoteButton(sender: UIButton) {
-        
+        sender.removeFromSuperview()
+        removeSpecificNoteButton()
     }
     
     override func didReceiveMemoryWarning() {
