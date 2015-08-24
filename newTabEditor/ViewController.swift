@@ -12,12 +12,6 @@ import CoreData
 
 
 class ViewController: UIViewController{
-    
-    var chords: [Chord] = [Chord]()
-    
-    // core data delegate
-//    var yourPosition: NSMutableArray = NSMutableArray()
-//    var delegate: PositionSelectDelegate? = nil
     var core = coreData()
     
     //first view
@@ -56,33 +50,36 @@ class ViewController: UIViewController{
     var mainNoteButton: UIButton = UIButton() // add on the string
     var fingerPoint: [UIButton] = [UIButton]()
     
+    //screen height and width
     var trueWidth: CGFloat = CGFloat()
     var trueHeight: CGFloat = CGFloat()
     
+    //landscape screen
     override func prefersStatusBarHidden() -> Bool {
         return true
     }
-    
     override func supportedInterfaceOrientations() -> Int {
         return Int(UIInterfaceOrientationMask.Landscape.rawValue)
     }
-    
     override func shouldAutorotate() -> Bool {
         return true
     }
-    
     override func preferredInterfaceOrientationForPresentation() -> UIInterfaceOrientation {
         return UIInterfaceOrientation.LandscapeLeft
     }
     
+    //init
     init() {
         super.init(nibName: nil, bundle: nil)
     }
-    
     required init(coder: NSCoder) {
         super.init(coder: coder)
     }
 
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -140,7 +137,6 @@ class ViewController: UIViewController{
         createStringView()
         createFretsLabel()
         addFretsLabel("tabNameLabelNotEdit")
-//        addStringView("stringViewNotEdit")
         
         //tap recongnizer
         var singleTapRecognizer = UITapGestureRecognizer(target: self, action: "scrollViewSingleTapped:")
@@ -149,8 +145,7 @@ class ViewController: UIViewController{
         self.scrollView.addGestureRecognizer(singleTapRecognizer)
     }
     
-
-    
+    // objects on edit view
     func addObjectsOnEditView() {
         if editAvaliable == true {
             self.newTabName.frame = CGRectMake(0.82 * self.trueWidth, 0.09 * self.trueHeight, 0.1 * self.trueWidth, 0.1 * self.trueHeight)
@@ -174,7 +169,6 @@ class ViewController: UIViewController{
             })
         }
     }
-    
     func removeObjectOnEditView() {
         if self.editAvaliable == false {
             newTabName.removeFromSuperview()
@@ -188,6 +182,7 @@ class ViewController: UIViewController{
         }
     }
     
+    // objects on main view
     func addObjectsOnMainView() {
         var buttonColor = UIColor.grayColor().colorWithAlphaComponent(0.4)
         var buttonWidth = CGFloat(28)
@@ -250,6 +245,7 @@ class ViewController: UIViewController{
 
     }
     
+    // all fret location
     func fretLocation() {
         var fretStartPoint = 0
         var fretWidth = self.trueWidth / 6
@@ -265,7 +261,38 @@ class ViewController: UIViewController{
             }
         }
     }
+    func createFretsLabel() {
+        var labelWidth = 0.05 * self.trueHeight
+        var width = self.trueWidth / 6
+        for var index = 0; index < 25; index++ {
+            var temp: UILabel = UILabel()
+            temp.frame = CGRectMake(width / 2 + CGFloat(index) * width - labelWidth, 0, labelWidth * 2, labelWidth)
+            temp.textAlignment = NSTextAlignment.Center
+            temp.text = "\(index)"
+            temp.textColor = UIColor.blackColor()
+            tabNameLabelNotEdit.append(temp)
+        }
+    }
+    func addFretsLabel(sender: String) {
+        if sender == "tabNameLabelNotEdit" {
+            for var index = 0; index < tabNameLabelNotEdit.count; index++ {
+                self.fretLabelView.addSubview(tabNameLabelNotEdit[index])
+            }
+        }
+    }
+    func removeFretsLabel(sender: String) {
+        if sender == "tabNameLabelEdit" {
+            for var index = 0; index < tabNameLabelEdit.count; index++ {
+                self.tabNameLabelEdit[index].removeFromSuperview()
+            }
+        } else if sender == "tabNameLabelNotEdit" {
+            for var index = 0; index < tabNameLabelNotEdit.count; index++ {
+                self.tabNameLabelNotEdit[index].removeFromSuperview()
+            }
+        }
+    }
     
+    // all string view
     func createStringView() {
         for var index = 0; index < 6; index++ {
             var labelHeight = 0.05 * self.trueHeight
@@ -296,7 +323,6 @@ class ViewController: UIViewController{
             stringViewNotEdit.append(tempView)
         }
     }
-    
     func addStringView(sender: String) {
         if sender == "stringViewEdit" {
             for var index = 0; index < stringViewEdit.count; index++ {
@@ -309,7 +335,6 @@ class ViewController: UIViewController{
             }
         }
     }
-    
     func removeStringView(sender: String) {
         if sender == "stringViewEdit" {
             for var index = 0; index < stringViewEdit.count; index++ {
@@ -323,44 +348,7 @@ class ViewController: UIViewController{
         }
     }
     
-    func createFretsLabel() {
-        var labelWidth = 0.05 * self.trueHeight
-        var width = self.trueWidth / 6
-        for var index = 0; index < 25; index++ {
-            var temp: UILabel = UILabel()
-            temp.frame = CGRectMake(width / 2 + CGFloat(index) * width - labelWidth, 0, labelWidth * 2, labelWidth)
-            temp.textAlignment = NSTextAlignment.Center
-            temp.text = "\(index)"
-            temp.textColor = UIColor.blackColor()
-            tabNameLabelNotEdit.append(temp)
-        }
-    }
-    
-    func addFretsLabel(sender: String) {
-//        if sender == "tabNameLabelEdit" {
-//            for var index = 0; index < tabNameLabelEdit.count; index++ {
-//                self.fretLabelView.addSubview(tabNameLabelEdit[index])
-//            }
-//        } else
-        if sender == "tabNameLabelNotEdit" {
-            for var index = 0; index < tabNameLabelNotEdit.count; index++ {
-                self.fretLabelView.addSubview(tabNameLabelNotEdit[index])
-            }
-        }
-    }
-    
-    func removeFretsLabel(sender: String) {
-        if sender == "tabNameLabelEdit" {
-            for var index = 0; index < tabNameLabelEdit.count; index++ {
-                self.tabNameLabelEdit[index].removeFromSuperview()
-            }
-        } else if sender == "tabNameLabelNotEdit" {
-            for var index = 0; index < tabNameLabelNotEdit.count; index++ {
-                self.tabNameLabelNotEdit[index].removeFromSuperview()
-            }
-        }
-    }
-    
+    // scroll view single tap
     func scrollViewSingleTapped(sender: UITapGestureRecognizer) {
         if self.editAvaliable == true {
             let location = sender.locationInView(self.scrollView)
@@ -401,13 +389,12 @@ class ViewController: UIViewController{
         }
     }
     
-    
+    // specific note button
     func removeSpecificNoteButton() {
         for view in self.existTabScrollView.subviews {
             view.removeFromSuperview()
         }
     }
-    
     func addSpecificNoteButton(index: NSNumber) {
         for var i = 0; i < 25; i++ {
             var dict: NSDictionary = core.getExistTab(NSNumber(integer: (Int(index) + i)))
@@ -427,7 +414,6 @@ class ViewController: UIViewController{
             }
         }
     }
-    
     func pressSpecificNoteButton(sender: UIButton) {
         removeFingerPoint()
         println("press specific note button")
@@ -437,6 +423,7 @@ class ViewController: UIViewController{
         addFingerPoint(index, content: content)
     }
     
+    // finger point
     func addFingerPoint(index: NSNumber, content: String) {
         var stringNumber = Int(index) / 10000
         var buttonWidth = 0.08 * self.trueHeight
@@ -460,7 +447,7 @@ class ViewController: UIViewController{
             if i / 2 != stringNumber - 1 {
                 fingerButton.frame = CGRectMake(buttonX, buttonY, buttonWidth, buttonWidth)
                 fingerButton.setBackgroundImage(image, forState: UIControlState.Normal)
-                fingerButton.addTarget(self, action: "pressFingerButton", forControlEvents: UIControlEvents.TouchUpInside)
+                fingerButton.addTarget(self, action: "pressFingerButton:", forControlEvents: UIControlEvents.TouchUpInside)
                 fingerButton.alpha = 0
                 fingerPoint.append(fingerButton)
                 UIView.animateWithDuration(0.5, animations: {
@@ -471,17 +458,16 @@ class ViewController: UIViewController{
             
         }
     }
-    
     func removeFingerPoint() {
         for item in self.fingerPoint {
             item.removeFromSuperview()
         }
     }
-    
     func pressFingerButton(sender: UIButton) {
         println("press finger button")
     }
     
+    // temp note button
     func createNoteButton(name: String, position: CGPoint) {
         var buttonWidth = 0.1 * self.trueHeight
         var buttonX = (fretsLocation[Int(position.y)] + fretsLocation[Int(position.y) + 1]) / 2 - buttonWidth / 2
@@ -501,25 +487,17 @@ class ViewController: UIViewController{
             self.editViewTempNoteButton.alpha = 1
         })
     }
-    
     func pressEditViewTempNoteButton(sender: UIButton) {
         sender.removeFromSuperview()
         removeSpecificNoteButton()
+        println("press edit view temp note button")
     }
     
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
 
+    // back button
     func pressBackButton(sender: UIButton) {
         if self.editAvaliable == true {
             self.editAvaliable = false
-            //self.guitarImage.image = UIImage(named: "3-strings")
-            //addStringView("stringViewNotEdit")
-            //removeStringView("stringViewEdit")
-            //addFretsLabel("tabNameLabelNotEdit")
-            //removeFretsLabel("tabNameLabelEdit")
             removeFingerPoint()
             self.editViewTempNoteButton.removeFromSuperview()
             println("press Back Button")
@@ -540,15 +518,11 @@ class ViewController: UIViewController{
         }
     }
 
+    //edit button
     func pressEditButton(sender: UIButton) {
         self.editAvaliable = true
-//        addStringView("stringViewEdit")
-//        removeStringView("stringViewNotEdit")
-        //addFretsLabel("tabNameLabelEdit")
-        //removeFretsLabel("tabNameLabelNotEdit")
         addObjectsOnEditView()
         self.editViewTempNoteButton.accessibilityIdentifier = "TempNoteButton"
-        //self.guitarImage.image = UIImage(named: "6-strings")
         println("press Edit Button")
         self.fretLabelView.frame = CGRectMake(0, 0.75 * self.trueHeight, self.scrollView.contentSize.width, 0.05 * self.trueHeight)
         self.view.addSubview(editViewBackgroundImage)
@@ -580,8 +554,5 @@ class ViewController: UIViewController{
         println("press Remove Button")
     }
     
-    func pressNoteButton(sender: UIButton) {
-        
-    }
 }
 
