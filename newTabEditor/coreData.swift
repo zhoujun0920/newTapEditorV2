@@ -31,7 +31,7 @@ class coreData: NSObject  {
         
         //5th string
         for var i = 0; i < 4; i++ {
-            for var j = 0; j < 25; j++ {
+            for var j = 0; j < 23; j++ {
                 var t: String = String()
                 if i == 0 {
                     if j == 3 {
@@ -39,7 +39,7 @@ class coreData: NSObject  {
                     } else {
                         if j < 8 {
                             fingersString["\(500 + j)00"] = "xx0\(j)0\(j + 2)0\(j + 2)0\(j + 2)0\(j)"
-                        } else j >= 8 && j < 10 {
+                        } else if j >= 8 && j < 10 {
                             fingersString["\(500 + j)00"] = "xx0\(j)\(j + 2)\(j + 2)\(j + 2)0\(j)"
                         } else {
                             fingersString["\(500 + j)00"] = "xx\(j)\(j + 2)\(j + 2)\(j + 2)\(j)"
@@ -81,28 +81,28 @@ class coreData: NSObject  {
         
         //6th string
         for var i = 0; i < 3; i++ {
-            for var j = 0; j < 25; j++ {
+            for var j = 0; j < 23; j++ {
                 if i == 0 {
                     if j == 3 {
                         fingersString["60300"] = "030200000003"
                     } else {
                         if j < 8 {
-                            fingersString["\(600 + j)00"] = "xx0\(j)0\(j + 2)0\(j + 2)0\(j + 1)0\(j)0\(j)"
+                            fingersString["\(600 + j)00"] = "0\(j)0\(j + 2)0\(j + 2)0\(j + 1)0\(j)0\(j)"
                         } else if j == 8 {
-                            fingersString["\(600 + j)00"] = "xx0\(j)\(j + 2)\(j + 2)0\(j + 1)0\(j)0\(j)"
+                            fingersString["\(600 + j)00"] = "0\(j)\(j + 2)\(j + 2)0\(j + 1)0\(j)0\(j)"
                         } else if j == 9 {
-                            fingersString["\(600 + j)00"] = "xx0\(j)\(j + 2)\(j + 2)\(j + 1)0\(j)0\(j)"
+                            fingersString["\(600 + j)00"] = "x\(j)\(j + 2)\(j + 2)\(j + 1)0\(j)0\(j)"
                         }else {
-                            fingersString["\(600 + j)00"] = "xx\(j)\(j + 2)\(j + 2)\(j + 1)\(j)\(j)"
+                            fingersString["\(600 + j)00"] = "\(j)\(j + 2)\(j + 2)\(j + 1)\(j)\(j)"
                         }
                     }
                 } else if i == 1 {
                     if j < 8 {
-                        fingersString["\(600 + j)01"] = "xx0\(j)0\(j + 2)0\(j + 2)0\(j)0\(j)0\(j)"
+                        fingersString["\(600 + j)01"] = "0\(j)0\(j + 2)0\(j + 2)0\(j)0\(j)0\(j)"
                     } else if j >= 8 && j < 10 {
-                        fingersString["\(600 + j)01"] = "xx0\(j)\(j + 2)\(j + 2)0\(j)0\(j)0\(j)"
+                        fingersString["\(600 + j)01"] = "0\(j)\(j + 2)\(j + 2)0\(j)0\(j)0\(j)"
                     } else {
-                        fingersString["\(600 + j)01"] = "xx\(j)\(j + 2)\(j + 2)\(j)\(j)\(j)"
+                        fingersString["\(600 + j)01"] = "\(j)\(j + 2)\(j + 2)\(j)\(j)\(j)"
                     }
                 } else if i == 2 {
                     if j == 3 {

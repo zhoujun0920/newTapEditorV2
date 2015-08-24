@@ -113,9 +113,10 @@ class ViewController: UIViewController{
         // add notes view
         editAvaliable = false
         addExistTabOnScrollView = false
+        var fretLength = self.trueWidth / 6
         
         self.scrollView.frame = CGRectMake(0, self.trueHeight, self.trueWidth, -0.425 * self.trueHeight)
-        self.scrollView.contentSize = CGSizeMake(self.trueWidth * 4.2, 0.425 * self.trueHeight)
+        self.scrollView.contentSize = CGSizeMake(25 * fretLength, 0.425 * self.trueHeight)
         self.scrollView.layer.borderWidth = 1
         self.view.addSubview(self.scrollView)
     
@@ -384,11 +385,13 @@ class ViewController: UIViewController{
                         var note = dict.objectForKey("name") as! String
                         createNoteButton(note, position: choosedNote)
                         removeSpecificNoteButton()
+                        removeFingerPoint()
                         addSpecificNoteButton(indexPosition)
                     }
                     else {
                         self.editViewTempNoteButton.removeFromSuperview()
                         removeSpecificNoteButton()
+                        removeFingerPoint()
                     }
                     println("\(FretsBoard.fretsBoard[Int(choosedNote.x)][Int(choosedNote.y)])")
                     break
@@ -426,44 +429,52 @@ class ViewController: UIViewController{
     }
     
     func pressSpecificNoteButton(sender: UIButton) {
-        if self.fingerPoint.count > 0 {
-            for item in fingerPoint {
-                item.removeFromSuperview()
-            }
-        }
+        removeFingerPoint()
         println("press specific note button")
         var index = sender.tag as NSNumber
         var dict = core.getExistTab(index)
         var content = dict.objectForKey("content") as! String
-        addFingerPrint(index, content: content)
+        addFingerPoint(index, content: content)
     }
     
-    func addFingerPrint(index: NSNumber, content: String) {
+    func addFingerPoint(index: NSNumber, content: String) {
         var stringNumber = Int(index) / 10000
         var buttonWidth = 0.08 * self.trueHeight
         var buttonX = fretsLocation[1] - buttonWidth / 2
         var buttonY = stringViewEdit[5].center.y - buttonWidth / 2
-        for var i = 5; i >= 0; i-- {
-            var charAtIndex = content[advance(content.startIndex, 5 - i)]
+        for var i = 11; i >= 0; i = i - 2 {
+            let index = advance(content.startIndex, 11 - i)
+            let endIndex = advance(content.startIndex, 11 - i + 2)
+            var charAtIndex = content[Range(start: index, end: endIndex)]
             var fingerButton: UIButton = UIButton()
             var image: UIImage = UIImage()
-            if charAtIndex == "x" {
+            if charAtIndex == "xx" {
                 buttonX = fretsLocation[1] - buttonWidth / 2
                 image = UIImage(named: "blackX")!
             } else {
                 var temp = String(charAtIndex).toInt()
                 image = UIImage(named: "grayButton")!
-                buttonX = fretsLocation[temp! + 1] - buttonWidth / 2
-                buttonY = stringViewEdit[i].center.y - buttonWidth / 2
+                buttonX = (fretsLocation[temp!] + fretsLocation[temp! + 1]) / 2 - buttonWidth / 2
+                buttonY = stringViewEdit[i / 2].center.y - buttonWidth / 2
             }
-            if i != stringNumber - 1 {
+            if i / 2 != stringNumber - 1 {
                 fingerButton.frame = CGRectMake(buttonX, buttonY, buttonWidth, buttonWidth)
                 fingerButton.setBackgroundImage(image, forState: UIControlState.Normal)
                 fingerButton.addTarget(self, action: "pressFingerButton", forControlEvents: UIControlEvents.TouchUpInside)
+                fingerButton.alpha = 0
                 fingerPoint.append(fingerButton)
+                UIView.animateWithDuration(0.5, animations: {
+                    fingerButton.alpha = 1
+                })
                 self.scrollView.addSubview(fingerButton)
             }
             
+        }
+    }
+    
+    func removeFingerPoint() {
+        for item in self.fingerPoint {
+            item.removeFromSuperview()
         }
     }
     
@@ -509,6 +520,7 @@ class ViewController: UIViewController{
             //removeStringView("stringViewEdit")
             //addFretsLabel("tabNameLabelNotEdit")
             //removeFretsLabel("tabNameLabelEdit")
+            removeFingerPoint()
             self.editViewTempNoteButton.removeFromSuperview()
             println("press Back Button")
             self.view.addSubview(self.previousButton)
