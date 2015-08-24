@@ -83,14 +83,11 @@ class ViewController: UIViewController{
         super.init(coder: coder)
     }
 
-    var chordCCollection = ["C", "Cm", "C7", "Cm7", "C5", "C6", "C9", "Cm6", "Cm9", "C7M", "C9M", "C11"]
-    var chordGCollection = ["G", "Gm", "G7", "Gm7", "G5", "G6", "G9", "Gm6", "Gm9", "G7M", "G9M", "G11"]
+
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-        
-        
-        core.addDefaultDataToDatabase()
+        core.addDefaultData()
         
         var tabs: NSDictionary = NSDictionary()
         
@@ -124,12 +121,12 @@ class ViewController: UIViewController{
     
         //guitar 6 string image
         guitarImage.frame = CGRectMake(0, 0, self.scrollView.contentSize.width, 0.75 * self.trueHeight)
-        guitarImage.image = UIImage(named: "6-strings")
+        guitarImage.image = UIImage(named: "6-strings-updated")
         self.scrollView.addSubview(guitarImage)
         
         //guitar 3 string image
         self.guitar3StringImage.frame = CGRectMake(0, 0, self.scrollView.contentSize.width, 0.375 * self.trueHeight)
-        self.guitar3StringImage.image = UIImage(named: "3-strings")
+        self.guitar3StringImage.image = UIImage(named: "3-strings-updated")
         self.scrollView.addSubview(guitar3StringImage)
         
         //fret label view
@@ -141,7 +138,7 @@ class ViewController: UIViewController{
         fretLocation()
         createStringView()
         createFretsLabel()
-//        addFretsLabel("tabNameLabelNotEdit")
+        addFretsLabel("tabNameLabelNotEdit")
 //        addStringView("stringViewNotEdit")
         
         //tap recongnizer
@@ -271,13 +268,13 @@ class ViewController: UIViewController{
     func createStringView() {
         for var index = 0; index < 6; index++ {
             var labelHeight = 0.05 * self.trueHeight
-            var width = (0.8 * self.trueHeight - labelHeight) / 7
+            var width = 0.75 * self.trueHeight / 6
             var tempView: UIView = UIView()
-            tempView.frame = CGRectMake(0, width / 2 + width * CGFloat(index), self.scrollView.contentSize.width, width)
+            tempView.frame = CGRectMake(0, width * CGFloat(index), self.scrollView.contentSize.width, width)
             if index % 2 == 1 {
-                tempView.backgroundColor = UIColor.clearColor()
+                tempView.backgroundColor = UIColor.redColor()
             } else {
-                tempView.backgroundColor = UIColor.clearColor()
+                tempView.backgroundColor = UIColor.blueColor()
             }
             //tempView.addTarget(self, action: "pressStringView:", forControlEvents: UIControlEvents.TouchUpInside)
             tempView.tag = index
@@ -285,13 +282,13 @@ class ViewController: UIViewController{
         }
         for var index = 0; index < 3; index++ {
             var labelHeight = 0.05 * self.trueHeight
-            var width = (0.425 * self.trueHeight - labelHeight) / 4
+            var width = 0.375 * self.trueHeight / 3
             var tempView: UIView = UIView()
-            tempView.frame = CGRectMake(0, width / 2 + width * CGFloat(index), self.scrollView.contentSize.width, width)
+            tempView.frame = CGRectMake(0, width * CGFloat(index), self.scrollView.contentSize.width, width)
             if index % 2 == 1 {
-                tempView.backgroundColor = UIColor.clearColor()
+                tempView.backgroundColor = UIColor.redColor()
             } else {
-                tempView.backgroundColor = UIColor.clearColor()
+                tempView.backgroundColor = UIColor.blueColor()
             }
             //tempView.addTarget(self, action: "pressStringView:", forControlEvents: UIControlEvents.TouchUpInside)
             tempView.tag = index
@@ -330,24 +327,21 @@ class ViewController: UIViewController{
         var width = self.trueWidth / 6
         for var index = 0; index < 25; index++ {
             var temp: UILabel = UILabel()
-            var temp2: UILabel = UILabel()
-            temp.frame = CGRectMake(width + CGFloat(index) * width, 0.425 * self.trueHeight - labelWidth, labelWidth, labelWidth)
-            temp2.frame = CGRectMake(width + CGFloat(index) * width, 0.8 * self.trueHeight - labelWidth, labelWidth, labelWidth)
+            temp.frame = CGRectMake(width / 2 + CGFloat(index) * width - labelWidth, 0, labelWidth * 2, labelWidth)
+            temp.textAlignment = NSTextAlignment.Center
             temp.text = "\(index)"
-            temp2.text = "\(index)"
-            temp.textColor = UIColor.redColor()
-            temp2.textColor = UIColor.redColor()
+            temp.textColor = UIColor.blackColor()
             tabNameLabelNotEdit.append(temp)
-            tabNameLabelEdit.append(temp2)
         }
     }
     
     func addFretsLabel(sender: String) {
-        if sender == "tabNameLabelEdit" {
-            for var index = 0; index < tabNameLabelEdit.count; index++ {
-                self.fretLabelView.addSubview(tabNameLabelEdit[index])
-            }
-        } else if sender == "tabNameLabelNotEdit" {
+//        if sender == "tabNameLabelEdit" {
+//            for var index = 0; index < tabNameLabelEdit.count; index++ {
+//                self.fretLabelView.addSubview(tabNameLabelEdit[index])
+//            }
+//        } else
+        if sender == "tabNameLabelNotEdit" {
             for var index = 0; index < tabNameLabelNotEdit.count; index++ {
                 self.fretLabelView.addSubview(tabNameLabelNotEdit[index])
             }
@@ -386,10 +380,11 @@ class ViewController: UIViewController{
                     choosedNote.x = CGFloat(stringViewEdit[index].tag)
                     if choosedNote.x > 2 {
                        //createNoteButton(FretsBoard.fretsBoard[Int(choosedNote.x)][Int(choosedNote.y)], position: choosedNote)
-                        var temp = Int(choosedNote.x * 100 + choosedNote.y)
+                        var temp = Int((choosedNote.x + 1) * 1000 + choosedNote.y * 10)
                         var indexPosition = NSNumber(integer: temp)
-                        var dict = core.getMainTabFromDatabase(indexPosition)
-                        //createNoteButton(dict.note, position: choosedNote)
+                        var dict: NSDictionary = core.getExistTab(indexPosition)
+                        var note = dict.objectForKey("name") as! String
+                        createNoteButton(note, position: choosedNote)
                     }
                     else {
                         //self.editViewTempNoteButton.removeFromSuperview()
@@ -455,8 +450,8 @@ class ViewController: UIViewController{
         if self.editAvaliable == true {
             self.editAvaliable = false
             //self.guitarImage.image = UIImage(named: "3-strings")
-            addStringView("stringViewNotEdit")
-            removeStringView("stringViewEdit")
+            //addStringView("stringViewNotEdit")
+            //removeStringView("stringViewEdit")
             //addFretsLabel("tabNameLabelNotEdit")
             //removeFretsLabel("tabNameLabelEdit")
             self.editViewTempNoteButton.removeFromSuperview()
@@ -480,8 +475,8 @@ class ViewController: UIViewController{
 
     func pressEditButton(sender: UIButton) {
         self.editAvaliable = true
-        addStringView("stringViewEdit")
-        removeStringView("stringViewNotEdit")
+//        addStringView("stringViewEdit")
+//        removeStringView("stringViewNotEdit")
         //addFretsLabel("tabNameLabelEdit")
         //removeFretsLabel("tabNameLabelNotEdit")
         addObjectsOnEditView()

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="7701" systemVersion="14F27" minimumToolsVersion="Xcode 4.3" macOSVersion="Automatic" iOSVersion="Automatic">
     <entity name="Position" representedClassName="Position" isAbstract="YES" syncable="YES">
-        <attribute name="index" optional="YES" attributeType="Integer 16" minValueString="0" maxValueString="524" defaultValueString="0" syncable="YES"/>
+        <attribute name="index" optional="YES" attributeType="Integer 32" minValueString="0" maxValueString="524" defaultValueString="0" syncable="YES"/>
         <attribute name="note" optional="YES" attributeType="String" syncable="YES"/>
         <relationship name="positionForTab" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Tab" inverseName="tabAtPosition" inverseEntity="Tab" syncable="YES"/>
     </entity>
     <entity name="Tab" representedClassName="Tab" syncable="YES">
-        <attribute name="index" optional="YES" attributeType="Integer 16" defaultValueString="0" syncable="YES"/>
+        <attribute name="index" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
         <attribute name="tab_content" optional="YES" attributeType="Transformable" syncable="YES"/>
         <attribute name="tab_name" optional="YES" attributeType="String" syncable="YES"/>
         <relationship name="tabAtPosition" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Position" inverseName="positionForTab" inverseEntity="Position" storedInTruthFile="YES" syncable="YES"/>
