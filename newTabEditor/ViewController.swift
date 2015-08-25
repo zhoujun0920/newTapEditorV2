@@ -27,13 +27,13 @@ class ViewController: UIViewController{
     var mainViewTitle: UILabel = UILabel()
     var menuView: UIView = UIView()
     var fretLabelView: UIView = UIView()
+    var mainTabButton: [UIButton] = [UIButton]()
     
     //edit view
     var guitar3StringImage: UIImageView = UIImageView()
     var addExistTabOnScrollView: Bool = Bool()
     var existTabScrollView: UIScrollView = UIScrollView()
     var newTabName: UITextField = UITextField()
-    var newTabAvaliable: UISwitch = UISwitch()
     var editView: UIView = UIView()
     var scrollView: UIScrollView = UIScrollView()
     var tabNameLabelEdit: [UILabel] = [UILabel]()
@@ -42,6 +42,7 @@ class ViewController: UIViewController{
     var editAvaliable: Bool = Bool()
     var choosedNote: CGPoint = CGPoint()
     var editViewTempNoteButton: UIButton = UIButton() // only exist on edit process
+    var addTabAvaliable: Bool = Bool() // allow to add new tab
     
     //string view
     var stringViewEdit: [UIView] = [UIView]()
@@ -49,6 +50,12 @@ class ViewController: UIViewController{
     var fretsLocation: [CGFloat] = [CGFloat]()
     var mainNoteButton: UIButton = UIButton() // add on the string
     var fingerPoint: [UIButton] = [UIButton]()
+    
+    //edit finger point struct
+    struct editFingerPointStruct {
+        static var location: [Int] = [Int]()
+        static var fingerButton: [UIButton] = [UIButton]()
+    }
     
     //screen height and width
     var trueWidth: CGFloat = CGFloat()
@@ -84,6 +91,7 @@ class ViewController: UIViewController{
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        
         core.addDefaultData()
         
         var tabs: NSDictionary = NSDictionary()
@@ -148,22 +156,18 @@ class ViewController: UIViewController{
     // objects on edit view
     func addObjectsOnEditView() {
         if editAvaliable == true {
-            self.newTabName.frame = CGRectMake(0.82 * self.trueWidth, 0.09 * self.trueHeight, 0.1 * self.trueWidth, 0.1 * self.trueHeight)
+            self.newTabName.frame = CGRectMake(0.82 * self.trueWidth, 0.09 * self.trueHeight, 0.17 * self.trueWidth, 0.1 * self.trueHeight)
             self.newTabName.backgroundColor = UIColor.whiteColor().colorWithAlphaComponent(0.6)
             self.newTabName.layer.cornerRadius = 0.4
-            self.newTabAvaliable.frame = CGRectMake(0.925 * self.trueWidth, 0.1 * self.trueHeight, 0.1 * self.trueWidth, 0.12 * self.trueHeight)
-            self.newTabAvaliable.alpha = 0
-            self.newTabAvaliable.setOn(false, animated: true)
-            self.newTabAvaliable.alpha = 0
-            self.existTabScrollView.frame = CGRectMake(0, 0.09 * self.trueHeight, 0.55 * self.trueWidth, 0.1 * self.trueHeight)
+            self.existTabScrollView.frame = CGRectMake(0.01 * self.trueWidth, 0.09 * self.trueHeight, 0.55 * self.trueWidth, 0.1 * self.trueHeight)
             self.existTabScrollView.contentSize = CGSizeMake(1 * self.trueWidth, 0.1 * self.trueHeight)
             self.existTabScrollView.backgroundColor = UIColor.brownColor().colorWithAlphaComponent(0.6)
             self.existTabScrollView.alpha = 0
             self.view.addSubview(self.existTabScrollView)
             self.view.addSubview(self.newTabName)
-            self.view.addSubview(self.newTabAvaliable)
+           // self.view.addSubview(self.newTabSwitch)
             UIView.animateWithDuration(0.5, animations: {
-                self.newTabAvaliable.alpha = 1
+              //  self.newTabSwitch.alpha = 1
                 self.newTabName.alpha = 0.6
                 self.existTabScrollView.alpha = 0.6
             })
@@ -172,7 +176,7 @@ class ViewController: UIViewController{
     func removeObjectOnEditView() {
         if self.editAvaliable == false {
             newTabName.removeFromSuperview()
-            newTabAvaliable.removeFromSuperview()
+           // newTabSwitch.removeFromSuperview()
             existTabScrollView.removeFromSuperview()
         }
         if self.addExistTabOnScrollView == true {
@@ -304,7 +308,6 @@ class ViewController: UIViewController{
             } else {
                 tempView.backgroundColor = UIColor.blueColor()
             }
-            //tempView.addTarget(self, action: "pressStringView:", forControlEvents: UIControlEvents.TouchUpInside)
             tempView.tag = index
             stringViewEdit.append(tempView)
         }
@@ -318,9 +321,9 @@ class ViewController: UIViewController{
             } else {
                 tempView.backgroundColor = UIColor.blueColor()
             }
-            //tempView.addTarget(self, action: "pressStringView:", forControlEvents: UIControlEvents.TouchUpInside)
             tempView.tag = index
             stringViewNotEdit.append(tempView)
+            
         }
     }
     func addStringView(sender: String) {
@@ -362,31 +365,53 @@ class ViewController: UIViewController{
                 }
             }
             for var index = 0; index < 6; index++ {
-                if CGRectContainsPoint(stringViewEdit[index].frame, location) {
-                    //println("\(stringView[index].tag)")
-                    choosedNote.x = CGFloat(stringViewEdit[index].tag)
-                    if choosedNote.x > 2 {
-                       //createNoteButton(FretsBoard.fretsBoard[Int(choosedNote.x)][Int(choosedNote.y)], position: choosedNote)
-                        var temp = Int((choosedNote.x + 1) * 10000 + choosedNote.y * 100)
-                        var indexPosition = NSNumber(integer: temp)
-                        var dict: NSDictionary = core.getExistTab(indexPosition)
-                        var note = dict.objectForKey("name") as! String
-                        createNoteButton(note, position: choosedNote)
-                        removeSpecificNoteButton()
-                        removeFingerPoint()
-                        addSpecificNoteButton(indexPosition)
+                if self.addTabAvaliable == false {
+                    if CGRectContainsPoint(stringViewEdit[index].frame, location) {
+                        choosedNote.x = CGFloat(stringViewEdit[index].tag)
+                        if choosedNote.x > 2 {
+                            var temp = Int((choosedNote.x + 1) * 10000 + choosedNote.y * 100)
+                            var indexPosition = NSNumber(integer: temp)
+                            var dict: NSDictionary = core.getExistTab(indexPosition)
+                            var note = dict.objectForKey("name") as! String
+                            createNoteButton(note, position: choosedNote)
+                            removeSpecificNoteButton()
+                            removeFingerPoint()
+                            removeEditFingerButton()
+                            self.addTabAvaliable = true
+                            addSpecificNoteButton(indexPosition)
+                            createEditFingerButton(Int(choosedNote.x))
+                        }
+                        else {
+                            self.editViewTempNoteButton.removeFromSuperview()
+                            removeSpecificNoteButton()
+                            removeFingerPoint()
+                            removeEditFingerButton()
+                        }
+                        break
                     }
-                    else {
-                        self.editViewTempNoteButton.removeFromSuperview()
-                        removeSpecificNoteButton()
-                        removeFingerPoint()
+                }
+                else {
+                    if CGRectContainsPoint(stringViewEdit[index].frame, location) {
+                        choosedNote.x = CGFloat(stringViewEdit[index].tag)
+                        moveFingerPointButton(choosedNote)
                     }
-                    println("\(FretsBoard.fretsBoard[Int(choosedNote.x)][Int(choosedNote.y)])")
-                    break
                 }
             }
 
         }
+    }
+    
+    func moveFingerPointButton(position: CGPoint) {
+        var buttonWidth = 0.08 * self.trueHeight
+        var buttonX = (fretsLocation[Int(position.y)] + fretsLocation[Int(position.y) + 1]) / 2 - buttonWidth / 2
+        var buttonY = stringViewEdit[Int(position.x)].center.y - buttonWidth / 2
+        var location = Int(choosedNote.y)
+        editFingerPointStruct.location[Int(choosedNote.x)] = location
+        editFingerPointStruct.fingerButton[Int(choosedNote.x)].frame = CGRectMake(buttonX, buttonY, buttonWidth, buttonWidth)
+        editFingerPointStruct.fingerButton[Int(choosedNote.x)].alpha = 0
+        UIView.animateWithDuration(0.5, animations: {
+            editFingerPointStruct.fingerButton[Int(self.choosedNote.x)].alpha = 1
+        })
     }
     
     // specific note button
@@ -402,7 +427,7 @@ class ViewController: UIViewController{
                 if dict.objectForKey("content") as! String != "" {
                     var buttonWidth = 0.08 * self.trueHeight
                     var tempButton: UIButton = UIButton()
-                    tempButton.frame = CGRectMake(CGFloat(i) * (buttonWidth + 5) * 1.5, 0.01 * self.trueHeight, buttonWidth * 1.5, buttonWidth)
+                    tempButton.frame = CGRectMake(CGFloat(i) * (buttonWidth + 5) * 1.5 + 0.01 * self.trueWidth, 0.01 * self.trueHeight, buttonWidth * 1.5, buttonWidth)
                     tempButton.setTitle(dict.objectForKey("name") as? String, forState: UIControlState.Normal)
                     tempButton.layer.cornerRadius = 3
                     tempButton.backgroundColor = UIColor.blackColor().colorWithAlphaComponent(0.6)
@@ -416,6 +441,7 @@ class ViewController: UIViewController{
     }
     func pressSpecificNoteButton(sender: UIButton) {
         removeFingerPoint()
+        removeEditFingerButton()
         println("press specific note button")
         var index = sender.tag as NSNumber
         var dict = core.getExistTab(index)
@@ -437,6 +463,7 @@ class ViewController: UIViewController{
             var image: UIImage = UIImage()
             if charAtIndex == "xx" {
                 buttonX = fretsLocation[1] - buttonWidth / 2
+                buttonY = stringViewEdit[i / 2].center.y - buttonWidth / 2
                 image = UIImage(named: "blackX")!
             } else {
                 var temp = String(charAtIndex).toInt()
@@ -482,6 +509,7 @@ class ViewController: UIViewController{
         self.editViewTempNoteButton.layer.borderColor = red.CGColor
         self.editViewTempNoteButton.layer.cornerRadius = 0.5 * buttonWidth
         self.editViewTempNoteButton.accessibilityIdentifier = "TempNoteButtonExist"
+        self.editViewTempNoteButton.tag = Int(position.x) * 100 + Int(position.y)
         self.scrollView.addSubview(editViewTempNoteButton)
         UIView.animateWithDuration(0.5, animations: {
             self.editViewTempNoteButton.alpha = 1
@@ -490,36 +518,56 @@ class ViewController: UIViewController{
     func pressEditViewTempNoteButton(sender: UIButton) {
         sender.removeFromSuperview()
         removeSpecificNoteButton()
+        removeFingerPoint()
+        removeEditFingerButton()
+        self.addTabAvaliable = false
         println("press edit view temp note button")
     }
     
+    // edit tab finger and add new tab
+    func createEditFingerButton(index: Int) {
+        if addTabAvaliable == true {
+            removeEditFingerButton()
+            var buttonWidth = 0.08 * self.trueHeight
+            var buttonX = (fretsLocation[0] + fretsLocation[1]) / 2 - buttonWidth / 2
+            for var i = 0; i < 6; i++ {
+                var buttonY = stringViewEdit[i].center.y - buttonWidth / 2
+                var tempButton: UIButton = UIButton()
+                tempButton.frame = CGRectMake(buttonX, buttonY, buttonWidth, buttonWidth)
+                tempButton.setBackgroundImage(UIImage(named: "grayButton"), forState: UIControlState.Normal)
+                tempButton.alpha = 0
+                if i != index {
+                    self.scrollView.addSubview(tempButton)
+                }
+                UIView.animateWithDuration(0.5, animations: {
+                    tempButton.alpha = 1
+                })
+                editFingerPointStruct.fingerButton.append(tempButton)
+                editFingerPointStruct.location.append(index)
+            }
+        }
+    }
+    
+    func removeEditFingerButton() {
+        for item in editFingerPointStruct.fingerButton {
+            if item.superview != nil {
+                item.removeFromSuperview()
+            }
+        }
+        editFingerPointStruct.fingerButton.removeAll(keepCapacity: false)
+        editFingerPointStruct.location.removeAll(keepCapacity: false)
+    }
 
     // back button
     func pressBackButton(sender: UIButton) {
-        if self.editAvaliable == true {
-            self.editAvaliable = false
-            removeFingerPoint()
-            self.editViewTempNoteButton.removeFromSuperview()
-            println("press Back Button")
-            self.view.addSubview(self.previousButton)
-            self.fretLabelView.frame = CGRectMake(0, 0.375 * trueHeight, self.scrollView.contentSize.width, 0.05 * self.trueHeight)
-            self.fretLabelView.alpha = 0
-            removeObjectOnEditView()
-            removeStringView("stringViewEdit")
-            UIView.animateWithDuration(0.3, animations: {
-                self.fretLabelView.alpha = 1
-                self.scrollView.frame = CGRectMake(0, self.trueHeight, self.trueWidth, -0.425 * self.trueHeight)
-                self.editView.frame = CGRectMake(0, 0.08 * self.trueHeight, self.trueWidth, 0)
-                self.guitarImage.frame = CGRectMake(0, 0, self.scrollView.contentSize.width, 0.75 * self.trueHeight)
-                self.previousButton.alpha = 1
-                self.guitar3StringImage.alpha = 1
-            })
-            self.guitar3StringImage.frame = CGRectMake(0, 0, self.scrollView.contentSize.width, 0.375 * self.trueHeight)
+        if editAvaliable == true {
+            backToMainView()
         }
     }
 
     //edit button
     func pressEditButton(sender: UIButton) {
+        removeMainTabButton()
         self.editAvaliable = true
         addObjectsOnEditView()
         self.editViewTempNoteButton.accessibilityIdentifier = "TempNoteButton"
@@ -540,6 +588,36 @@ class ViewController: UIViewController{
     
     func pressDoneButton(sender: UIButton) {
         println("press Done Button")
+        backToMainView()
+        if editAvaliable == true {
+            
+        }
+        if addTabAvaliable == true {
+            
+        }
+        for item in mainTabButton {
+            var buttonWidth = 0.1 * self.trueHeight
+            var buttonY = stringViewNotEdit[item.tag / 100 - 3].center.y - buttonWidth / 2
+            var y = item.tag - item.tag / 100 * 100
+            var buttonX = (fretsLocation[y] + fretsLocation[y + 1]) / 2 - buttonWidth / 2
+            item.frame = CGRectMake(buttonX, buttonY, buttonWidth, buttonWidth)
+            item.removeTarget(self, action: "pressEditViewTempNoteButton:", forControlEvents: UIControlEvents.TouchUpInside)
+            item.addTarget(self, action: "pressMainTabButton:", forControlEvents: UIControlEvents.TouchUpInside)
+            self.scrollView.addSubview(item)
+        }
+        editAvaliable = false
+        addTabAvaliable = false
+        
+    }
+    
+    func pressMainTabButton(sender: UIButton) {
+        println("press main tab button")
+    }
+    
+    func removeMainTabButton() {
+        for item in mainTabButton {
+            item.removeFromSuperview()
+        }
     }
     
     func pressPreviousButton(sender: UIButton) {
@@ -553,6 +631,29 @@ class ViewController: UIViewController{
     func pressRemoveButton(sender: UIButton) {
         println("press Remove Button")
     }
+    
+    func backToMainView() {
+        self.editAvaliable = false
+        removeFingerPoint()
+        removeEditFingerButton()
+        self.editViewTempNoteButton.removeFromSuperview()
+        println("press Back Button")
+        self.view.addSubview(self.previousButton)
+        self.fretLabelView.frame = CGRectMake(0, 0.375 * trueHeight, self.scrollView.contentSize.width, 0.05 * self.trueHeight)
+        self.fretLabelView.alpha = 0
+        removeObjectOnEditView()
+        removeStringView("stringViewEdit")
+        UIView.animateWithDuration(0.3, animations: {
+            self.fretLabelView.alpha = 1
+            self.scrollView.frame = CGRectMake(0, self.trueHeight, self.trueWidth, -0.425 * self.trueHeight)
+            self.editView.frame = CGRectMake(0, 0.08 * self.trueHeight, self.trueWidth, 0)
+            self.guitarImage.frame = CGRectMake(0, 0, self.scrollView.contentSize.width, 0.75 * self.trueHeight)
+            self.previousButton.alpha = 1
+            self.guitar3StringImage.alpha = 1
+        })
+        self.guitar3StringImage.frame = CGRectMake(0, 0, self.scrollView.contentSize.width, 0.375 * self.trueHeight)
+    }
+    
     
 }
 
