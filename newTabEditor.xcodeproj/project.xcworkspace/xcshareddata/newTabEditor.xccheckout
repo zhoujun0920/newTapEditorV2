@@ -7,14 +7,14 @@
 	<key>IDESourceControlProjectIdentifier</key>
 	<string>0A80AD21-71D2-4638-8416-DC9B730DA7E6</string>
 	<key>IDESourceControlProjectName</key>
-	<string>project</string>
+	<string>newTabEditor</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
 		<key>E0A4A59B738DDA8E443B52BD4A449E18D1DC79C1</key>
 		<string>http://github.com/zhoujun0920/newTapEditorV2.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>newTabEditor.xcodeproj/project.xcworkspace</string>
+	<string>newTabEditor.xcodeproj</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
 		<key>E0A4A59B738DDA8E443B52BD4A449E18D1DC79C1</key>

@@ -21,6 +21,8 @@
 		5AD35B9B1B8AB9CE000958E5 /* FretBoard.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 5AD35B991B8AB9CE000958E5 /* FretBoard.xcdatamodeld */; };
 		5AD35B9F1B8ABA7E000958E5 /* Tabs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD35B9E1B8ABA7E000958E5 /* Tabs.swift */; };
 		5AD35BA01B8ABA7F000958E5 /* Tabs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD35B9E1B8ABA7E000958E5 /* Tabs.swift */; };
+		5AD35BA71B8C331B000958E5 /* NewTabs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD35BA61B8C331B000958E5 /* NewTabs.swift */; };
+		5AD35BA81B8C331B000958E5 /* NewTabs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AD35BA61B8C331B000958E5 /* NewTabs.swift */; };
 		5AEED8541B7981470042C7AC /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AEED8531B7981470042C7AC /* AppDelegate.swift */; };
 		5AEED8561B7981470042C7AC /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AEED8551B7981470042C7AC /* ViewController.swift */; };
 		5AEED8591B7981470042C7AC /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5AEED8571B7981470042C7AC /* Main.storyboard */; };
@@ -49,6 +51,7 @@
 		5A85D9AC1B841C0700E4A1F2 /* Chord.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Chord.xcdatamodel; sourceTree = "<group>"; };
 		5AD35B9A1B8AB9CE000958E5 /* FretBoard.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = FretBoard.xcdatamodel; sourceTree = "<group>"; };
 		5AD35B9E1B8ABA7E000958E5 /* Tabs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Tabs.swift; sourceTree = "<group>"; };
+		5AD35BA61B8C331B000958E5 /* NewTabs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NewTabs.swift; sourceTree = "<group>"; };
 		5AEED84E1B7981470042C7AC /* newTabEditor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = newTabEditor.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5AEED8521B7981470042C7AC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		5AEED8531B7981470042C7AC /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -84,6 +87,7 @@
 			isa = PBXGroup;
 			children = (
 				5AD35B991B8AB9CE000958E5 /* FretBoard.xcdatamodeld */,
+				5AD35BA61B8C331B000958E5 /* NewTabs.swift */,
 				5AD35B9E1B8ABA7E000958E5 /* Tabs.swift */,
 				5A6FD9CF1B8535650058E08F /* coreData.swift */,
 			);
@@ -263,6 +267,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5AD35BA71B8C331B000958E5 /* NewTabs.swift in Sources */,
 				5AEED8741B7999230042C7AC /* Chord.swift in Sources */,
 				5AEED8561B7981470042C7AC /* ViewController.swift in Sources */,
 				5AEED8541B7981470042C7AC /* AppDelegate.swift in Sources */,
@@ -287,6 +292,7 @@
 				5A6FD9C81B8502930058E08F /* Tab.swift in Sources */,
 				5A6FD9CB1B8502940058E08F /* Position.swift in Sources */,
 				5AD35BA01B8ABA7F000958E5 /* Tabs.swift in Sources */,
+				5AD35BA81B8C331B000958E5 /* NewTabs.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
