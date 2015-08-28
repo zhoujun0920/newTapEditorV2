@@ -14,6 +14,9 @@ import CoreData
 class ViewController: UIViewController{
     var core = coreData()
     
+    //add tab to music view
+    var musicView: UIView = UIView()
+    
     //first view
     var backgroundImage: UIImageView = UIImageView()
     var guitarImage: UIImageView = UIImageView()
@@ -47,6 +50,7 @@ class ViewController: UIViewController{
     var addTabAvaliable: Bool = Bool() // allow to add new tab
     var currentButton: UIButton = UIButton()
     var newTabButton: [UIButton] = [UIButton]()
+    var ExistTabButton: [UIButton] = [UIButton]()
     
     //string view
     var stringViewEdit: [UIView] = [UIView]()
@@ -198,6 +202,10 @@ class ViewController: UIViewController{
     
     // objects on main view
     func addObjectsOnMainView() {
+        self.musicView.frame = CGRectMake(0, 0.1 * self.trueHeight, self.trueWidth, 0.45 * self.trueHeight)
+        self.musicView.backgroundColor = UIColor.grayColor().colorWithAlphaComponent(0.4)
+        self.view.addSubview(self.musicView)
+        
         var buttonColor = UIColor.grayColor().colorWithAlphaComponent(0.4)
         var buttonWidth = CGFloat(28)
         var centerPoint = 0.08 * self.trueHeight / 2
@@ -428,6 +436,7 @@ class ViewController: UIViewController{
         }
     }
     func addSpecificNoteButton(index: NSNumber) -> Int {
+        self.ExistTabButton.removeAll(keepCapacity: false)
         var count = 0
         for var i = 0; i < 4; i++ {
             var dict: NSDictionary = core.getExistTab(NSNumber(integer: (Int(index) + i)))
@@ -441,8 +450,11 @@ class ViewController: UIViewController{
                     tempButton.layer.cornerRadius = 3
                     tempButton.backgroundColor = UIColor.blackColor().colorWithAlphaComponent(0.6)
                     tempButton.setTitleColor(UIColor.whiteColor(), forState: UIControlState.Normal)
+                    tempButton.titleLabel?.adjustsFontSizeToFitWidth = true
+                    tempButton.titleLabel?.minimumScaleFactor = 0.5
                     tempButton.tag = Int((dict.objectForKey("index") as! NSNumber))
                     tempButton.addTarget(self, action: "pressSpecificNoteButton:", forControlEvents: UIControlEvents.TouchUpInside)
+                    self.ExistTabButton.append(tempButton)
                     self.existTabScrollView.addSubview(tempButton)
                 }
             }
@@ -452,13 +464,20 @@ class ViewController: UIViewController{
     func pressSpecificNoteButton(sender: UIButton) {
         removeFingerPoint()
         removeEditFingerButton()
-        changeButtonStatus(sender)
-        println("press specific note button")
-        var index = sender.tag as NSNumber
-        var dict = core.getExistTab(index)
-        var content = dict.objectForKey("content") as! String
-        self.addTabAvaliable = false
-        addFingerPoint(index, content: content)
+        if self.deleteButtonPressed == false {
+            changeButtonStatus(sender)
+            println("press specific note button")
+            var index = sender.tag as NSNumber
+            var dict = core.getExistTab(index)
+            var content = dict.objectForKey("content") as! String
+            self.addTabAvaliable = false
+            addFingerPoint(index, content: content)
+        } else {
+            let alertController = UIAlertController(title: "Delete Warning", message: "Cannot delete built-in tabs", preferredStyle: UIAlertControllerStyle.Alert)
+            alertController.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.Default,handler: nil))
+            self.presentViewController(alertController, animated: true, completion: nil)
+            changeDeleteButtonStatus(self.removeButton, back: true)
+        }
     }
     func changeButtonStatus(sender: UIButton) {
         if self.currentButton.accessibilityIdentifier == "NoCurrentButton" {
@@ -487,6 +506,8 @@ class ViewController: UIViewController{
                 tempButton.backgroundColor = UIColor.blackColor().colorWithAlphaComponent(0.6)
                 tempButton.setTitleColor(UIColor.whiteColor(), forState: UIControlState.Normal)
                 tempButton.tag = ((dict[i].objectForKey("index") as! String)).toInt()!
+                tempButton.titleLabel?.adjustsFontSizeToFitWidth = true
+                tempButton.titleLabel?.minimumScaleFactor = 0.5
                 tempButton.addTarget(self, action: "pressNewSpecificNoteButton:", forControlEvents: UIControlEvents.TouchUpInside)
                 self.newTabButton.append(tempButton)
                 self.existTabScrollView.addSubview(tempButton)
@@ -497,14 +518,37 @@ class ViewController: UIViewController{
         removeFingerPoint()
         removeEditFingerButton()
         println("press specific new note button")
-        changeButtonStatus(sender)
-        var name: String = sender.titleLabel!.text!
-        var index: String = "\(sender.tag)"
-        var dict = core.getExistNewTabWithName(index, name: name)
-        var content: String = dict.objectForKey("content") as! String
-        self.addTabAvaliable = false
-        var tempIndex = NSNumber(integer: index.toInt()!)
-        addFingerPoint(tempIndex, content: content)
+        if self.deleteButtonPressed == false {
+            changeButtonStatus(sender)
+            var name: String = sender.titleLabel!.text!
+            var index: String = "\(sender.tag)"
+            var dict = core.getExistNewTabWithName(index, name: name)
+            var content: String = dict.objectForKey("content") as! String
+            self.addTabAvaliable = false
+            var tempIndex = NSNumber(integer: index.toInt()!)
+            addFingerPoint(tempIndex, content: content)
+        } else {
+            sender.removeFromSuperview()
+            var count = 0
+            for item in self.newTabButton {
+                if item == sender {
+                    var name = sender.titleLabel?.text
+                    core.removeExistNewTab("\(sender.tag)", name: name!)
+                    self.newTabButton.removeAtIndex(count)
+                    break
+                }
+                count++
+            }
+            count = 0
+            for item in self.mainTabButton {
+                if item.titleLabel?.text == sender.titleLabel?.text && item.tag + 100 == sender.tag {
+                    self.mainTabButton.removeAtIndex(count)
+                    break
+                }
+                count++
+            }
+            changeDeleteButtonStatus(self.removeButton, back: true)
+        }
     }
     
     // finger point
@@ -568,6 +612,8 @@ class ViewController: UIViewController{
         self.editViewTempNoteButton.layer.cornerRadius = 0.5 * buttonWidth
         self.editViewTempNoteButton.accessibilityIdentifier = "TempNoteButtonExist"
         self.editViewTempNoteButton.tag = Int(position.x) * 100 + Int(position.y)
+        self.editViewTempNoteButton.titleLabel?.adjustsFontSizeToFitWidth = true
+        self.editViewTempNoteButton.titleLabel?.minimumScaleFactor = 0.5
         self.scrollView.addSubview(editViewTempNoteButton)
         UIView.animateWithDuration(0.5, animations: {
             self.editViewTempNoteButton.alpha = 1
@@ -656,6 +702,7 @@ class ViewController: UIViewController{
         self.addTabAvaliable = false
         self.newTabName.text = ""
         self.mainStatusTitle.text = "Tab Editor"
+        self.view.addSubview(self.musicView)
         removeSpecificNoteButton()
         removeFingerPoint()
         removeEditFingerButton()
@@ -705,9 +752,8 @@ class ViewController: UIViewController{
     
     // done button
     func pressDoneButton(sender: UIButton) {
-        self.deleteButtonPressed = false
-        changeDeleteButtonStatus(self.removeButton, back: true)
-        if editAvaliable == true {
+
+        if editAvaliable == true && deleteButtonPressed == false {
             println("press Done Button")
             if editViewTempNoteButton.accessibilityIdentifier == "TempNoteButtonExist" {
                 
@@ -734,14 +780,79 @@ class ViewController: UIViewController{
                     addMainTabButton()
                 }
             }
+        } else {
+            editAvaliable = false
+            self.deleteButtonPressed = false
+            changeDeleteButtonStatus(self.removeButton, back: true)
+            backToMainView()
+            addMainTabButton()
         }
     }
     
     func reorganizeMainTabButton(sender: [UIButton]) {
-        var count = 0
-        for item in sender {
-            var name = item.titleLabel?.text
-            if 
+        // temperary store repeated button
+        var tempRepeatedButtonIndex: [Int] = [Int]()
+        // store finished button index
+        var repeatedButtonIndex: [Int] = [Int]()
+        
+        for var i = 0; i < sender.count; i++ {
+            if contains(repeatedButtonIndex, i) == false {
+                tempRepeatedButtonIndex.append(i)
+                repeatedButtonIndex.append(i)
+                var fullName = sender[i].tag
+                var name = fullName
+                if name > 10000 {
+                    name = name / 100
+                }
+                var repeatNumber = 1
+                // find the tab in the same fret
+                for var j = i + 1; j < sender.count; j++ {
+                    var fullName2 = sender[j].tag
+                    var name2 = fullName2
+                    if name2 > 10000 {
+                        name2 = name2 / 100
+                    }
+                    if name == name2 {
+                        repeatNumber++
+                        tempRepeatedButtonIndex.append(j)
+                        repeatedButtonIndex.append(j)
+                    }
+                }
+                // deal with the button position
+                var buttonWidth = 0.1 * self.trueHeight
+                if tempRepeatedButtonIndex.count == 2 {
+                    buttonWidth = 0.09 * self.trueHeight
+                } else if tempRepeatedButtonIndex.count >= 3 {
+                    buttonWidth = 0.07 * self.trueHeight
+                }
+                var rrr = repeatNumber + 1
+                if repeatNumber >= 3 {
+                    rrr = 4
+                }
+                for var k = 0; k < tempRepeatedButtonIndex.count; k++ {
+                    if k < 3 {
+                        var frameWidth = self.trueWidth / CGFloat(6) / CGFloat(rrr)
+                        var py = name / 100
+                        var px = name - py * 100
+                        var buttonX = fretsLocation[px] + CGFloat(k + 1) * frameWidth - buttonWidth / 2
+                        var buttonY = stringViewEdit[py - 3].center.y - buttonWidth / 2
+                        var index = tempRepeatedButtonIndex[k]
+                        sender[index].frame = CGRectMake(buttonX, buttonY, buttonWidth, buttonWidth)
+                        sender[index].layer.cornerRadius = 0.5 * buttonWidth
+                        sender[index].titleLabel?.adjustsFontSizeToFitWidth = true
+                        sender[index].titleLabel?.minimumScaleFactor = 0.5
+                    } else {
+                        let alertController = UIAlertController(title: "Warning", message:
+                            "Cannot add four tabs in one fret", preferredStyle: UIAlertControllerStyle.Alert)
+                        alertController.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.Default,handler: nil))
+                        self.presentViewController(alertController, animated: true, completion: nil)
+                        sender[tempRepeatedButtonIndex[k]].removeFromSuperview()
+                        mainTabButton.removeAtIndex(tempRepeatedButtonIndex[k])
+                    }
+                    
+                }
+                tempRepeatedButtonIndex.removeAll(keepCapacity: false)
+            }
         }
     }
     
@@ -751,6 +862,8 @@ class ViewController: UIViewController{
             let index = advance(name.startIndex, 0)
             let endIndex = advance(name.startIndex, 3)
             title = name[Range(start: index, end: endIndex)]
+        } else {
+            title = name
         }
         var tempButton: UIButton = UIButton()
         tempButton.tag = self.editViewTempNoteButton.tag
@@ -765,6 +878,8 @@ class ViewController: UIViewController{
         var red = UIColor(red: 100.0/255.0, green: 130.0/255.0, blue: 230.0/255.0, alpha: 1.0)
         tempButton.layer.borderColor = red.CGColor
         tempButton.layer.cornerRadius = 0.5 * tempButton.frame.width
+        tempButton.titleLabel?.adjustsFontSizeToFitWidth = true
+        tempButton.titleLabel?.minimumScaleFactor = 0.5
         return tempButton
     }
     
@@ -793,16 +908,34 @@ class ViewController: UIViewController{
     
     func pressMainTabButton(sender: UIButton) {
         println("press main tab button")
-        
+        if deleteButtonPressed == true {
+            println("delete this button")
+            var index = 0
+            for item in self.mainTabButton {
+                if item == sender {
+                    item.removeFromSuperview()
+                    mainTabButton.removeAtIndex(index)
+                    break
+                }
+                index++
+            }
+            changeDeleteButtonStatus(self.removeButton, back: true)
+            reorganizeMainTabButton(self.mainTabButton)
+        } else {
+            println("show it on top")
+            
+        }
     }
     
     func addMainTabButton() {
         for item in mainTabButton {
             self.scrollView.addSubview(item)
         }
+        reorganizeMainTabButton(self.mainTabButton)
     }
     
     func removeMainTabButton() {
+        self.musicView.removeFromSuperview()
         for item in mainTabButton {
             item.removeFromSuperview()
         }
@@ -821,115 +954,154 @@ class ViewController: UIViewController{
         var tabButton: UIButton = UIButton()
         var deleteButton: UIButton = UIButton()
     }
-    var allDeleteButton: [tabButtonWithDeleteButton] = [tabButtonWithDeleteButton]()
     var deleteButtonPressed: Bool = false
+    
     func pressRemoveButton(sender: UIButton) {
-        println("press Remove Button")
-        if self.deleteButtonPressed == false {
-            if editAvaliable == true {
-                //            var index = self.currentButton.tag
-                //            if index > 10000 {
-                //                let alertController = UIAlertController(title: "Delete Warning", message:
-                //                    "Cannot delete built-in tabs", preferredStyle: UIAlertControllerStyle.Alert)
-                //                alertController.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.Default,handler: nil))
-                //                self.presentViewController(alertController, animated: true, completion: nil)
-                //            } else {
-                //                var name = self.currentButton.titleLabel?.text
-                //                core.removeExistNewTab("\(index)", name: name!)
-                //                self.currentButton.removeFromSuperview()
-                //            }
-                var count = 0
-                for item in self.newTabButton {
-                    var deleteButton: UIButton = UIButton()
-                    deleteButton.frame = CGRectMake(0, 0, 15, 15)
-                    deleteButton.backgroundColor = UIColor.whiteColor().colorWithAlphaComponent(0.4)
-                    deleteButton.setImage(UIImage(named: "blackX"), forState: UIControlState.Normal)
-                    deleteButton.addTarget(self, action: "pressDeleteButton:", forControlEvents: UIControlEvents.TouchUpInside)
-                    var name = item.titleLabel?.text
-                    deleteButton.setTitle(name, forState: UIControlState.Normal)
-                    deleteButton.setTitleColor(UIColor.clearColor(), forState: UIControlState.Normal)
-                    deleteButton.layer.cornerRadius = 2
-                    deleteButton.tag = count
-                    var tempStruct: tabButtonWithDeleteButton = tabButtonWithDeleteButton()
-                    tempStruct.tabButton = item
-                    tempStruct.deleteButton = deleteButton
-                    self.allDeleteButton.append(tempStruct)
-                    item.addSubview(deleteButton)
-                    count++
-                }
-            } else {
-                var buttonWidth = 0.1 * self.trueHeight
-                var count = 0
-                for item in self.mainTabButton {
-                    var deleteButton: UIButton = UIButton()
-                    deleteButton.frame = CGRectMake(0, 0, 15, 15)
-                    deleteButton.backgroundColor = UIColor.whiteColor().colorWithAlphaComponent(0.4)
-                    deleteButton.layer.cornerRadius = 0.5 * 15
-                    deleteButton.setImage(UIImage(named: "blackX"), forState: UIControlState.Normal)
-                    deleteButton.addTarget(self, action: "pressDeleteButton:", forControlEvents: UIControlEvents.TouchUpInside)
-                    deleteButton.tag = count
-                    var tempStruct: tabButtonWithDeleteButton = tabButtonWithDeleteButton()
-                    tempStruct.tabButton = item
-                    tempStruct.deleteButton = deleteButton
-                    self.allDeleteButton.append(tempStruct)
-                    item.addSubview(deleteButton)
-                    count++
-                }
-                
-            }
-            self.deleteButtonPressed = true
+        if deleteButtonPressed == false {
+            deleteButtonPressed = true
             changeDeleteButtonStatus(sender, back: false)
-
-        } else {
-            self.deleteButtonPressed = false
-            changeDeleteButtonStatus(sender, back: true)
-        }
-        
-    }
-    func removeAllDeleteButton() {
-        for item in self.allDeleteButton {
-            item.deleteButton.removeFromSuperview()
-        }
-        self.allDeleteButton.removeAll(keepCapacity: false)
-        self.newTabButton.removeAll(keepCapacity: false)
-    }
-    func pressDeleteButton(sender: UIButton) {
-        println("delete button")
-        var tag = sender.tag
-        var tempStruct = allDeleteButton[tag]
-        var index = tempStruct.tabButton.tag
-        var name = tempStruct.tabButton.titleLabel?.text
-        if index < 10000 {
-            core.removeExistNewTab("\(index)", name: name!)
-        }
-        tempStruct.tabButton.removeFromSuperview()
-        var count = 0
-        for item in self.mainTabButton {
-            if item.tag == tempStruct.tabButton.tag {
-                mainTabButton.removeAtIndex(count)
+            if editAvaliable == true {
+                removeFingerPoint()
+                removeEditFingerButton()
+                for item in self.newTabButton {
+                    item.backgroundColor = UIColor.blackColor().colorWithAlphaComponent(0.6)
+                    item.setTitleColor(UIColor.whiteColor(), forState: UIControlState.Normal)
+                }
+                for item in self.ExistTabButton {
+                    item.backgroundColor = UIColor.blackColor().colorWithAlphaComponent(0.6)
+                    item.setTitleColor(UIColor.whiteColor(), forState: UIControlState.Normal)
+                }
             }
-            count++
+        } else {
+            changeDeleteButtonStatus(sender, back: true)
+            removeFingerPoint()
+            removeEditFingerButton()
         }
-        self.allDeleteButton.removeAtIndex(tag)
-        changeDeleteButtonStatus(self.removeButton, back: true)
-        self.deleteButtonPressed = false
     }
     func changeDeleteButtonStatus(sender: UIButton, back: Bool) {
         if back == false {
             sender.backgroundColor = UIColor.redColor().colorWithAlphaComponent(0.4)
             self.mainStatusTitle.text = "Delete Tab"
+            deleteButtonPressed = true
         } else {
             sender.backgroundColor = UIColor.grayColor().colorWithAlphaComponent(0.4)
-            removeAllDeleteButton()
+            //removeAllDeleteButton()
             if editAvaliable == true {
                 self.mainStatusTitle.text = "Add New Tab"
             } else {
                 self.mainStatusTitle.text = "Tab Editor"
             }
+            deleteButtonPressed = false
         }
     }
     
+    // for music view
+    struct tabOnMusicLine {
+        var tab: UIView = UIView()
+        var time: Float = Float()
+    }
+    
+    func createTabOnMusicLine(sender: Float) {
+        var tabX = 0.667 * self.trueWidth
+        var tabY = 0.3 * self.trueHeight
+        var tabWidth = 0.08 * self.trueHeight
+        var tabHeight = 0.09 * self.trueHeight
+        var tempTab: UIView = UIView()
+        tempTab.frame = CGRectMake(tabX, tabY, tabWidth, tabHeight)
+        
+    }
     
     
+//    func pressRemoveButton(sender: UIButton) {
+//        println("press Remove Button")
+//        if self.deleteButtonPressed == false {
+//            if editAvaliable == true {
+//                var count = 0
+//                for item in self.newTabButton {
+//                    var deleteButton: UIButton = UIButton()
+//                    deleteButton.frame = CGRectMake(0, 0, 15, 15)
+//                    deleteButton.backgroundColor = UIColor.whiteColor().colorWithAlphaComponent(0.4)
+//                    deleteButton.setImage(UIImage(named: "blackX"), forState: UIControlState.Normal)
+//                    deleteButton.addTarget(self, action: "pressDeleteButton:", forControlEvents: UIControlEvents.TouchUpInside)
+//                    var name = item.titleLabel?.text
+//                    deleteButton.setTitle(name, forState: UIControlState.Normal)
+//                    deleteButton.setTitleColor(UIColor.clearColor(), forState: UIControlState.Normal)
+//                    deleteButton.layer.cornerRadius = 2
+//                    deleteButton.tag = count
+//                    var tempStruct: tabButtonWithDeleteButton = tabButtonWithDeleteButton()
+//                    tempStruct.tabButton = item
+//                    tempStruct.deleteButton = deleteButton
+//                    self.allDeleteButton.append(tempStruct)
+//                    item.addSubview(deleteButton)
+//                    count++
+//                }
+//            } else {
+////                var buttonWidth = 0.1 * self.trueHeight
+////                var count = 0
+////                for item in self.mainTabButton {
+////                    var deleteButton: UIButton = UIButton()
+////                    deleteButton.frame = CGRectMake(0, 0, 15, 15)
+////                    deleteButton.backgroundColor = UIColor.whiteColor().colorWithAlphaComponent(0.4)
+////                    deleteButton.layer.cornerRadius = 0.5 * 15
+////                    deleteButton.setImage(UIImage(named: "blackX"), forState: UIControlState.Normal)
+////                    deleteButton.addTarget(self, action: "pressDeleteButton:", forControlEvents: UIControlEvents.TouchUpInside)
+////                    deleteButton.tag = count
+////                    var tempStruct: tabButtonWithDeleteButton = tabButtonWithDeleteButton()
+////                    tempStruct.tabButton = item
+////                    tempStruct.deleteButton = deleteButton
+////                    self.allDeleteButton.append(tempStruct)
+////                    item.addSubview(deleteButton)
+////                    count++
+////                }
+//                var index = self.currentButton.tag
+//                if index > 10000 {
+//                    let alertController = UIAlertController(title: "Delete Warning", message:
+//                        "Cannot delete built-in tabs", preferredStyle: UIAlertControllerStyle.Alert)
+//                    alertController.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.Default,handler: nil))
+//                    self.presentViewController(alertController, animated: true, completion: nil)
+//                } else {
+//                    var name = self.currentButton.titleLabel?.text
+//                    core.removeExistNewTab("\(index)", name: name!)
+//                    self.currentButton.removeFromSuperview()
+//                }
+//            }
+//            self.deleteButtonPressed = true
+//            changeDeleteButtonStatus(sender, back: false)
+//
+//        } else {
+//            self.deleteButtonPressed = false
+//            changeDeleteButtonStatus(sender, back: true)
+//        }
+//        
+//    }
+    
+//    func removeAllDeleteButton() {
+//        for item in self.allDeleteButton {
+//            item.deleteButton.removeFromSuperview()
+//        }
+//        self.allDeleteButton.removeAll(keepCapacity: false)
+//        self.newTabButton.removeAll(keepCapacity: false)
+//    }
+//    func pressDeleteButton(sender: UIButton) {
+//        println("delete button")
+//        var tag = sender.tag
+//        var tempStruct = allDeleteButton[tag]
+//        var index = tempStruct.tabButton.tag
+//        var name = tempStruct.tabButton.titleLabel?.text
+//        if index < 10000 {
+//            core.removeExistNewTab("\(index)", name: name!)
+//        }
+//        tempStruct.tabButton.removeFromSuperview()
+//        var count = 0
+//        for item in self.mainTabButton {
+//            if item.tag == tempStruct.tabButton.tag {
+//                mainTabButton.removeAtIndex(count)
+//            }
+//            count++
+//        }
+//        self.allDeleteButton.removeAtIndex(tag)
+//        changeDeleteButtonStatus(self.removeButton, back: true)
+//        self.deleteButtonPressed = false
+//    }
 }
 
