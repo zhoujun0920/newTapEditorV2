@@ -8,14 +8,34 @@
 
 import UIKit
 import CoreData
-
-
+import MediaPlayer
+import AVFoundation
 
 class ViewController: UIViewController{
     var core = coreData()
     
+    // count down view
+    var countDownView: UIView = UIView()
+    var countDownLabelImage: UIImageView = UIImageView()
+    var countDownNumber: Float = Float()
+    var timer: NSTimer = NSTimer()
+    var timer2: NSTimer = NSTimer()
+    var duringCountDown: Bool = Bool()
+    
+    //control music fire and stop
+    var tapNumber: Int =  Int()
+    
     //add tab to music view
     var musicView: UIView = UIView()
+    var progressBlock: SoundWaveView!
+    var blueLine: UIView = UIView()
+    var allLocalSong: [MPMediaItem]!
+    var uniqueSong: MPMediaItem!
+    var currentTime: NSTimeInterval = NSTimeInterval()
+    //var player: MPMusicPlayerController = MPMusicPlayerController.systemMusicPlayer()
+    var player: AVAudioPlayer = AVAudioPlayer()
+    var duration: NSTimeInterval = NSTimeInterval()
+    var persent: CGFloat = CGFloat()
     
     //first view
     var backgroundImage: UIImageView = UIImageView()
@@ -23,6 +43,7 @@ class ViewController: UIViewController{
     var editButton: UIButton = UIButton()
     var removeButton: UIButton = UIButton()
     var previewButton: UIButton = UIButton()
+    var resetButton: UIButton = UIButton()
     var previousButton: UIButton = UIButton()
     var backButton: UIButton = UIButton()
     var doneButton: UIButton = UIButton()
@@ -31,7 +52,7 @@ class ViewController: UIViewController{
     var menuView: UIView = UIView()
     var fretLabelView: UIView = UIView()
     var mainTabButton: [UIButton] = [UIButton]()
-    var deleteButton: [UIButton] = [UIButton]()
+    //var deleteButton: [UIButton] = [UIButton]()
     var mainStatusTitle: UILabel = UILabel()
     
     //edit view
@@ -51,13 +72,14 @@ class ViewController: UIViewController{
     var currentButton: UIButton = UIButton()
     var newTabButton: [UIButton] = [UIButton]()
     var ExistTabButton: [UIButton] = [UIButton]()
+    var choosedSpecificTab: Bool = Bool()
     
     //string view
     var stringViewEdit: [UIView] = [UIView]()
     var stringViewNotEdit: [UIView] = [UIView]()
     var fretsLocation: [CGFloat] = [CGFloat]()
     var mainNoteButton: UIButton = UIButton() // add on the string
-    var fingerPoint: [UIButton] = [UIButton]()
+    var fingerPoint: [UIButton] = [UIButton]() // store all the finger button on the scroll view
     
     //edit finger point struct
     struct editFingerPointStruct {
@@ -96,6 +118,10 @@ class ViewController: UIViewController{
         // Dispose of any resources that can be recreated.
     }
 
+    override func viewDidAppear(animated: Bool) {
+        self.player.stop()
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
@@ -103,7 +129,6 @@ class ViewController: UIViewController{
         core.addDefaultData()
         //core.removeAllNewTabFromDatabase()
         core.printAllNewTab()
-        
         
         var tabs: NSDictionary = NSDictionary()
         
@@ -122,7 +147,7 @@ class ViewController: UIViewController{
         
         // menu bar
         self.menuView.frame = CGRectMake(0, 0, trueWidth, 0.08 * trueHeight)
-        self.menuView.backgroundColor = UIColor.darkGrayColor().colorWithAlphaComponent(0.6)
+        self.menuView.backgroundColor = UIColor(patternImage: UIImage(named: "navigation-bar")!).colorWithAlphaComponent(0.6)
         self.view.addSubview(self.menuView)
         
 
@@ -164,6 +189,27 @@ class ViewController: UIViewController{
         singleTapRecognizer.numberOfTapsRequired = 1
         singleTapRecognizer.numberOfTouchesRequired = 1
         self.scrollView.addGestureRecognizer(singleTapRecognizer)
+        
+        //tap recongnizer
+        self.tapNumber = 0
+        var musicSingleTapRecognizer: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: "singleTapOnMusicView:")
+        musicSingleTapRecognizer.numberOfTapsRequired = 1
+        musicSingleTapRecognizer.numberOfTouchesRequired = 1
+        self.progressBlock.addGestureRecognizer(musicSingleTapRecognizer)
+        
+        //music play
+        loadLocalSongs()
+        var url: NSURL = allLocalSong[0].valueForProperty(MPMediaItemPropertyAssetURL) as! NSURL
+        self.player = AVAudioPlayer(contentsOfURL: url, error: nil)
+        self.duration = self.player.duration
+        self.player.volume = 1
+        //self.mainViewTitle.text = allLocalSong[0].title
+        //self.menuView.addSubview(self.mainViewTitle)
+    }
+    
+    func loadLocalSongs(){
+        var songCollection = MPMediaQuery.songsQuery()
+        self.allLocalSong = (songCollection.items as! [MPMediaItem]).filter({song in song.playbackDuration > 30 })
     }
     
     // objects on edit view
@@ -201,71 +247,169 @@ class ViewController: UIViewController{
     }
     
     // objects on main view
+    func singleTapOnMusicView(sender: UITapGestureRecognizer) {
+        if self.duringCountDown == false {
+            self.duringCountDown = true
+            if self.tapNumber % 2 == 0 {
+                self.countDownLabelImage.image = UIImage(named: "countdown-timer-3")
+                self.countDownNumber = 0
+                self.timer2 = NSTimer.scheduledTimerWithTimeInterval(0.1, target: self, selector: Selector("countDownThree"), userInfo: nil, repeats: true)
+            } else {
+                self.duringCountDown = false
+                self.player.stop()
+                self.timer.invalidate()
+            }
+            self.tapNumber++
+        }
+    }
+    
+    func update() {
+        self.currentTime = player.currentTime
+        self.persent = CGFloat(self.currentTime / self.duration)
+        progressBlock.setProgress(self.persent)
+        progressBlock.frame = CGRectMake(0.667 * self.trueWidth - self.persent * (4 * self.trueWidth), 0, 4 * self.trueWidth, 0.4 * self.trueHeight)
+    }
+    
+    func countDownThree() {
+        if self.countDownNumber == 0.1 {
+            self.view.addSubview(self.countDownView)
+        } else if self.countDownNumber >= 0.9 && self.countDownNumber <= 1.0 {
+            self.countDownLabelImage.image = UIImage(named: "countdown-timer-2")
+        } else if self.countDownNumber >= 1.9 && self.countDownNumber <= 2.0 {
+            self.countDownLabelImage.image = UIImage(named: "countdown-timer-1")
+        } else if self.countDownNumber > 2.5{
+            println("\(self.countDownNumber)")
+            timer2.invalidate()
+            self.duringCountDown = false
+            self.countDownView.removeFromSuperview()
+            self.player.currentTime = self.currentTime
+            self.player.play()
+            self.timer = NSTimer.scheduledTimerWithTimeInterval(0.2, target: self, selector: Selector("update"), userInfo: nil, repeats: true)
+           // NSRunLoop.mainRunLoop().addTimer(self.timer, forMode: NSRunLoopCommonModes)
+        }
+        self.countDownNumber = self.countDownNumber + 0.1
+    }
+    
+    func pressResetButton(sender: UIButton) {
+        let alertController = UIAlertController(title: "Reset Editing", message: "Are you sure you want to reset editing?", preferredStyle: UIAlertControllerStyle.Alert)
+        alertController.addAction(UIAlertAction(title: "Yes", style: UIAlertActionStyle.Default,handler: {
+            (action: UIAlertAction!) in
+            self.player.currentTime = 0
+            for item in self.allTabsOnMusicLine {
+                item.tab.removeFromSuperview()
+            }
+            self.allTabsOnMusicLine.removeAll(keepCapacity: false)
+        }))
+        alertController.addAction(UIAlertAction(title: "No", style: UIAlertActionStyle.Default, handler: nil))
+        self.presentViewController(alertController, animated: true, completion: nil)
+    }
+    
     func addObjectsOnMainView() {
-        self.musicView.frame = CGRectMake(0, 0.1 * self.trueHeight, self.trueWidth, 0.45 * self.trueHeight)
-        self.musicView.backgroundColor = UIColor.grayColor().colorWithAlphaComponent(0.4)
-        self.view.addSubview(self.musicView)
+        self.duringCountDown = false
+        self.choosedSpecificTab = false
         
-        var buttonColor = UIColor.grayColor().colorWithAlphaComponent(0.4)
-        var buttonWidth = CGFloat(28)
+        var labelWidth = 0.3 * self.trueHeight
+        var labelImageView: UIImageView = UIImageView()
+        labelImageView.frame = CGRectMake(0, 0, labelWidth, labelWidth)
+        labelImageView.layer.cornerRadius = 0.5 * labelWidth
+        labelImageView.image = UIImage(named: "countdown-timer")
+        labelImageView.alpha = 0.6
+        self.countDownView.addSubview(labelImageView)
+        
+        self.countDownView.frame = CGRectMake(self.trueWidth / 2 - labelWidth / 2, self.trueHeight / 2 - labelWidth, labelWidth, labelWidth)
+        self.countDownView.backgroundColor = UIColor(patternImage: UIImage(named: "countdown-timer")!)//.colorWithAlphaComponent(0.6)
+        self.countDownView.layer.cornerRadius = 0.5 * labelWidth
+        
+        self.countDownLabelImage.frame = CGRectMake(0, 0, labelWidth, labelWidth)
+        self.countDownLabelImage.image = UIImage(named: "countdown-timer-3")
+        self.countDownLabelImage.layer.cornerRadius = 0.5 * labelWidth
+        self.countDownLabelImage.backgroundColor = UIColor.clearColor()
+        self.countDownView.addSubview(self.countDownLabelImage)
+        self.countDownNumber = 0
+        
+        //music paly
+        self.musicView.frame = CGRectMake(0, 0.1 * self.trueHeight, self.trueWidth, 0.45 * self.trueHeight)
+        self.view.addSubview(self.musicView)
+        createSoundWave()
+        progressBlock.setProgress(CGFloat(0))
+        self.musicView.addSubview(self.progressBlock)
+        
+        self.blueLine.frame = CGRectMake(0.667 * self.trueWidth, 0, 2, 0.2 * self.trueHeight)
+        self.blueLine.backgroundColor = UIColor.blueColor()
+        self.musicView.addSubview(self.blueLine)
+        
+        
+        // control button
+        var buttonColor = UIColor.clearColor()
+        var buttonWidth = 0.15 * self.trueHeight
         var centerPoint = 0.08 * self.trueHeight / 2
-        self.backButton.frame = CGRectMake(16, centerPoint - 15, buttonWidth, buttonWidth)
+        self.backButton.frame = CGRectMake(0, centerPoint - buttonWidth / 4, buttonWidth, buttonWidth / 2)
         self.backButton.backgroundColor = buttonColor
-        self.backButton.setTitle("B", forState: UIControlState.Normal)
+        //self.backButton.setTitle("B", forState: UIControlState.Normal)
         self.backButton.addTarget(self, action: "pressBackButton:", forControlEvents: UIControlEvents.TouchUpInside)
         self.backButton.setImage(UIImage(named: "icon-back"), forState: UIControlState.Normal)
         self.backButton.imageView?.contentMode = UIViewContentMode.ScaleAspectFit
-        self.backButton.layer.cornerRadius = 0.5 * self.backButton.frame.width
+//        self.backButton.layer.cornerRadius = 0.5 * self.backButton.frame.width
         self.menuView.addSubview(backButton)
         
-        self.doneButton.frame = CGRectMake(self.trueWidth - 16 - 30, centerPoint - buttonWidth / 2, buttonWidth, buttonWidth)
+        self.doneButton.frame = CGRectMake(self.trueWidth - 0.015 * self.trueWidth - buttonWidth, centerPoint - buttonWidth / 4, buttonWidth, buttonWidth / 2)
         self.doneButton.backgroundColor = buttonColor
-        self.doneButton.setTitle("D", forState: UIControlState.Normal)
+        //self.doneButton.setTitle("D", forState: UIControlState.Normal)
         self.doneButton.addTarget(self, action: "pressDoneButton:", forControlEvents: UIControlEvents.TouchUpInside)
         self.doneButton.setImage(UIImage(named: "icon-done"), forState: UIControlState.Normal)
         self.doneButton.imageView?.contentMode = UIViewContentMode.ScaleAspectFit
-        self.doneButton.layer.cornerRadius = 0.5 * self.doneButton.frame.width
+//        self.doneButton.layer.cornerRadius = 0.5 * self.doneButton.frame.width
         self.menuView.addSubview(doneButton)
         
-        self.editButton.frame = CGRectMake(self.trueWidth - 46 - 20 - 30, centerPoint - buttonWidth / 2, buttonWidth, buttonWidth)
+        self.editButton.frame = CGRectMake(self.trueWidth - 2 * (0.015 * self.trueWidth + buttonWidth), centerPoint - buttonWidth / 4, buttonWidth, buttonWidth / 2)
         self.editButton.backgroundColor = buttonColor
-        self.editButton.setTitle("+", forState: UIControlState.Normal)
+        //self.editButton.setTitle("+", forState: UIControlState.Normal)
         self.editButton.addTarget(self, action: "pressEditButton:", forControlEvents: UIControlEvents.TouchUpInside)
         self.editButton.setImage(UIImage(named: "icon-add"), forState: UIControlState.Normal)
         self.editButton.imageView?.contentMode = UIViewContentMode.ScaleAspectFit
-        self.editButton.layer.cornerRadius = 0.5 * self.editButton.frame.width
+//        self.editButton.layer.cornerRadius = 0.5 * self.editButton.frame.width
         self.menuView.addSubview(editButton)
         
-        self.removeButton.frame = CGRectMake(self.trueWidth - 96 - 20 - 30, centerPoint - buttonWidth / 2, buttonWidth, buttonWidth)
+        self.removeButton.frame = CGRectMake(self.trueWidth - 3 * (0.015 * self.trueWidth + buttonWidth), centerPoint - buttonWidth / 4, buttonWidth, buttonWidth / 2)
         self.removeButton.backgroundColor = buttonColor
-        self.removeButton.setTitle("-", forState: UIControlState.Normal)
+        //self.removeButton.setTitle("-", forState: UIControlState.Normal)
         self.removeButton.addTarget(self, action: "pressRemoveButton:", forControlEvents: UIControlEvents.TouchUpInside)
-        self.removeButton.layer.cornerRadius = 0.5 * self.editButton.frame.width
+        self.removeButton.setImage(UIImage(named: "icon-delete"), forState: UIControlState.Normal)
+//        self.removeButton.layer.cornerRadius = 0.5 * self.editButton.frame.width
         self.removeButton.imageView?.contentMode = UIViewContentMode.ScaleAspectFit
         self.menuView.addSubview(removeButton)
         
-        self.previewButton.frame = CGRectMake(self.trueWidth - 146 - 20 - 70, centerPoint - buttonWidth / 2, 70, buttonWidth)
+        self.resetButton.frame = CGRectMake(self.trueWidth - 4 * (0.015 * self.trueWidth + buttonWidth) - 10, centerPoint - buttonWidth / 4, buttonWidth + 10, buttonWidth / 2)
+        self.resetButton.backgroundColor = buttonColor
+        self.resetButton.setTitle("reset", forState: UIControlState.Normal)
+        self.resetButton.addTarget(self, action: "pressResetButton:", forControlEvents: UIControlEvents.TouchUpInside)
+//        self.resetButton.layer.cornerRadius = 0.5 * self.editButton.frame.width
+        self.menuView.addSubview(resetButton)
+        
+        self.previewButton.frame = CGRectMake(self.trueWidth - 5 * (0.015 * self.trueWidth + buttonWidth) - 50, centerPoint - buttonWidth / 4, 70, buttonWidth / 2)
         self.previewButton.backgroundColor = buttonColor
         self.previewButton.setTitle("preview", forState: UIControlState.Normal)
         self.previewButton.addTarget(self, action: "pressPreviewButton:", forControlEvents: UIControlEvents.TouchUpInside)
         self.previewButton.imageView?.contentMode = UIViewContentMode.ScaleAspectFit
-        self.previewButton.layer.cornerRadius = 0.1 * self.editButton.frame.width
+//        self.previewButton.layer.cornerRadius = 0.1 * self.editButton.frame.width
         self.menuView.addSubview(previewButton)
         
         self.previousButton.frame = CGRectMake(self.trueWidth - 16 - 50, 0.575 * self.trueHeight - 50 - 16, 50, 50)
         self.previousButton.backgroundColor = buttonColor
-        self.previousButton.setTitle("P", forState: UIControlState.Normal)
+        //self.previousButton.setTitle("P", forState: UIControlState.Normal)
         self.previousButton.addTarget(self, action: "pressPreviousButton:", forControlEvents: UIControlEvents.TouchUpInside)
         self.previousButton.setImage(UIImage(named: "icon-back"), forState: UIControlState.Normal)
         self.previousButton.imageView?.contentMode = UIViewContentMode.ScaleAspectFit
-        self.previousButton.layer.cornerRadius = 0.5 * self.previousButton.frame.width
+//        self.previousButton.layer.cornerRadius = 0.5 * self.previousButton.frame.width
         self.view.addSubview(previousButton)
         
-        self.mainViewTitle.frame = CGRectMake(16 + 30 + 16, centerPoint - 15, 100, 30)
+        self.mainViewTitle.frame = CGRectMake(buttonWidth + 0.01 * self.trueHeight, centerPoint - buttonWidth / 4, 100, 30)
+        //test
         self.mainViewTitle.text = "Song Name"
-        self.menuView.addSubview(self.mainViewTitle)
+        //real
+
         
-        self.mainStatusTitle.frame = CGRectMake((self.trueWidth - 174) / 2 - 50, centerPoint - buttonWidth / 2, 150, buttonWidth)
+        self.mainStatusTitle.frame = CGRectMake(buttonWidth + 0.01 * self.trueHeight, centerPoint - buttonWidth / 2, 150, buttonWidth)
         self.mainStatusTitle.textAlignment = NSTextAlignment.Center
         self.mainStatusTitle.text = "Tab Editor"
         self.mainStatusTitle.backgroundColor = buttonColor
@@ -380,7 +524,6 @@ class ViewController: UIViewController{
         changeDeleteButtonStatus(self.removeButton, back: true)
         if self.editAvaliable == true {
             let location = sender.locationInView(self.scrollView)
-            //println("\(location.x) + \(location.y)")
             for var index = 0; index < fretsLocation.count; index++ {
                 if location.x < fretsLocation[fretsLocation.count - 2] {
                     if location.x > fretsLocation[index] && location.x < fretsLocation[index + 1] {
@@ -390,10 +533,10 @@ class ViewController: UIViewController{
                 }
             }
             for var index = 0; index < 6; index++ {
-                if self.addTabAvaliable == false {
+                if self.addTabAvaliable == false {  // not add new tab
                     if CGRectContainsPoint(stringViewEdit[index].frame, location) {
                         choosedNote.x = CGFloat(stringViewEdit[index].tag)
-                        if choosedNote.x > 2 {
+                        if choosedNote.x > 2 && self.choosedSpecificTab == false {
                             var temp = Int((choosedNote.x + 1) * 10000 + choosedNote.y * 100)
                             var temp2 = Int((choosedNote.x + 1) * 100 + choosedNote.y)
                             var indexPosition = NSNumber(integer: temp)
@@ -407,17 +550,18 @@ class ViewController: UIViewController{
                             var count = addSpecificNoteButton(indexPosition)
                             addNewSpecificNoteButton("\(temp2)", count: count)
                             createEditFingerButton(Int(choosedNote.x))
-                        }
-                        else {
+                        } else if self.choosedSpecificTab == true {
+                            moveExistFingerPointButton(choosedNote)
+                        } else {
                             self.editViewTempNoteButton.removeFromSuperview()
                             removeSpecificNoteButton()
                             removeFingerPoint()
                             removeEditFingerButton()
+                            moveEditFingerPointButton(choosedNote)
                         }
                         break
                     }
-                }
-                else {
+                } else {
                     if CGRectContainsPoint(stringViewEdit[index].frame, location) {
                         choosedNote.x = CGFloat(stringViewEdit[index].tag)
                         moveEditFingerPointButton(choosedNote)
@@ -425,6 +569,36 @@ class ViewController: UIViewController{
                 }
             }
 
+        }
+    }
+    
+    //change the exist finger point position
+    func moveExistFingerPointButton(sender: CGPoint) {
+        for item in self.fingerPoint {
+            var indexString = item.tag / 100 - 1
+            var indexFret = item.tag - indexString * 100
+            var senderString = Int(sender.x)
+            var senderFret = Int(sender.y)
+            if indexString == senderString {
+                var buttonWidth = 0.08 * self.trueHeight
+                var buttonX = (fretsLocation[senderFret] + fretsLocation[senderFret + 1]) / 2 - buttonWidth / 2
+                var buttonY = stringViewEdit[senderString].center.y - buttonWidth / 2
+                item.frame = CGRectMake(buttonX, buttonY, buttonWidth, buttonWidth)
+                item.alpha = 0
+                UIView.animateWithDuration(0.5, animations: {
+                    item.alpha = 1
+                })
+
+            }
+        }
+    }
+    func pressFingerButton(sender: UIButton) {
+        if sender.accessibilityIdentifier == "blackX" {
+            sender.accessibilityIdentifier = "grayButton"
+            sender.setImage(UIImage(named: "grayButton"), forState: UIControlState.Normal)
+        } else {
+            sender.accessibilityIdentifier = "blackX"
+            sender.setImage(UIImage(named: "blackX"), forState: UIControlState.Normal)
         }
     }
     
@@ -464,6 +638,7 @@ class ViewController: UIViewController{
     func pressSpecificNoteButton(sender: UIButton) {
         removeFingerPoint()
         removeEditFingerButton()
+        self.choosedSpecificTab = true
         if self.deleteButtonPressed == false {
             changeButtonStatus(sender)
             println("press specific note button")
@@ -517,6 +692,7 @@ class ViewController: UIViewController{
     func pressNewSpecificNoteButton(sender: UIButton) {
         removeFingerPoint()
         removeEditFingerButton()
+        self.choosedSpecificTab = true
         println("press specific new note button")
         if self.deleteButtonPressed == false {
             changeButtonStatus(sender)
@@ -550,7 +726,10 @@ class ViewController: UIViewController{
             changeDeleteButtonStatus(self.removeButton, back: true)
         }
     }
-    
+    struct existTabFingerPoint {
+        static var location: [Int] = [Int]()
+        static var content: [String] = [String]()
+    }
     // finger point
     func addFingerPoint(index: NSNumber, content: String) {
         var stringNumber: Int = Int()
@@ -568,21 +747,27 @@ class ViewController: UIViewController{
             var charAtIndex = content[Range(start: index, end: endIndex)]
             var fingerButton: UIButton = UIButton()
             var image: UIImage = UIImage()
+            var temp: Int = Int()
             if charAtIndex == "xx" {
+                temp = 1
                 buttonX = fretsLocation[1] - buttonWidth / 2
                 buttonY = stringViewEdit[i / 2].center.y - buttonWidth / 2
                 image = UIImage(named: "blackX")!
+                fingerButton.accessibilityIdentifier = "blackX"
             } else {
-                var temp = String(charAtIndex).toInt()
+                temp = String(charAtIndex).toInt()!
                 image = UIImage(named: "grayButton")!
-                buttonX = (fretsLocation[temp!] + fretsLocation[temp! + 1]) / 2 - buttonWidth / 2
+                buttonX = (fretsLocation[temp] + fretsLocation[temp + 1]) / 2 - buttonWidth / 2
                 buttonY = stringViewEdit[i / 2].center.y - buttonWidth / 2
+                fingerButton.accessibilityIdentifier = "grayButton"
             }
+            fingerButton.addTarget(self, action: "pressEditFingerButton:", forControlEvents: UIControlEvents.TouchUpInside)
             if i / 2 != stringNumber - 1 {
                 fingerButton.frame = CGRectMake(buttonX, buttonY, buttonWidth, buttonWidth)
                 fingerButton.setImage(image, forState: UIControlState.Normal)
                 fingerButton.alpha = 0
-                fingerPoint.append(fingerButton)
+                fingerButton.tag = (i / 2 + 1) * 100 + temp
+                fingerPoint.append(fingerButton)// store all the finger point for exist tabs
                 UIView.animateWithDuration(0.5, animations: {
                     fingerButton.alpha = 1
                 })
@@ -625,6 +810,7 @@ class ViewController: UIViewController{
         removeFingerPoint()
         removeEditFingerButton()
         self.addTabAvaliable = false
+        self.choosedSpecificTab = false
         println("press edit view temp note button")
     }
     
@@ -661,24 +847,28 @@ class ViewController: UIViewController{
         }
         editFingerPointStruct.fingerButton.removeAll(keepCapacity: false)
         editFingerPointStruct.location.removeAll(keepCapacity: false)
+        
+        
     }
     func moveEditFingerPointButton(position: CGPoint) {
-        var buttonWidth = 0.08 * self.trueHeight
-        var buttonX = (fretsLocation[Int(position.y)] + fretsLocation[Int(position.y) + 1]) / 2 - buttonWidth / 2
-        var buttonY = stringViewEdit[Int(position.x)].center.y - buttonWidth / 2
-        var location = Int(choosedNote.y)
-        editFingerPointStruct.location[Int(choosedNote.x)] = location
-        editFingerPointStruct.fingerButton[Int(choosedNote.x)].frame = CGRectMake(buttonX, buttonY, buttonWidth, buttonWidth)
-        editFingerPointStruct.fingerButton[Int(choosedNote.x)].alpha = 0
-        UIView.animateWithDuration(0.5, animations: {
-            editFingerPointStruct.fingerButton[Int(self.choosedNote.x)].alpha = 1
-        })
+        if editFingerPointStruct.location.count > 0 {
+            var buttonWidth = 0.08 * self.trueHeight
+            var buttonX = (fretsLocation[Int(position.y)] + fretsLocation[Int(position.y) + 1]) / 2 - buttonWidth / 2
+            var buttonY = stringViewEdit[Int(position.x)].center.y - buttonWidth / 2
+            var location = Int(choosedNote.y)
+            editFingerPointStruct.location[Int(choosedNote.x)] = location
+            editFingerPointStruct.fingerButton[Int(choosedNote.x)].frame = CGRectMake(buttonX, buttonY, buttonWidth, buttonWidth)
+            editFingerPointStruct.fingerButton[Int(choosedNote.x)].alpha = 0
+            UIView.animateWithDuration(0.5, animations: {
+                editFingerPointStruct.fingerButton[Int(self.choosedNote.x)].alpha = 1
+            })
+        }
     }
     func pressEditFingerButton(sender: UIButton) {
         println("press finger button")
         if sender.accessibilityIdentifier == "grayButton" {
             sender.accessibilityIdentifier = "blackX"
-            
+
             sender.setImage(UIImage(named: "blackX"), forState: UIControlState.Normal)
         } else {
             sender.accessibilityIdentifier = "grayButton"
@@ -698,6 +888,7 @@ class ViewController: UIViewController{
         
     }
     func backToMainView() {
+        self.choosedSpecificTab = false
         self.editAvaliable = false
         self.addTabAvaliable = false
         self.newTabName.text = ""
@@ -726,6 +917,8 @@ class ViewController: UIViewController{
     
     //edit button
     func pressEditButton(sender: UIButton) {
+        self.player.stop()
+        self.timer.invalidate()
         self.deleteButtonPressed = false
         changeDeleteButtonStatus(self.removeButton, back: true)
         self.mainStatusTitle.text = "Add New Tab"
@@ -752,7 +945,6 @@ class ViewController: UIViewController{
     
     // done button
     func pressDoneButton(sender: UIButton) {
-
         if editAvaliable == true && deleteButtonPressed == false {
             println("press Done Button")
             if editViewTempNoteButton.accessibilityIdentifier == "TempNoteButtonExist" {
@@ -906,27 +1098,6 @@ class ViewController: UIViewController{
         core.addNewTab(index, name: name, content: content)
     }
     
-    func pressMainTabButton(sender: UIButton) {
-        println("press main tab button")
-        if deleteButtonPressed == true {
-            println("delete this button")
-            var index = 0
-            for item in self.mainTabButton {
-                if item == sender {
-                    item.removeFromSuperview()
-                    mainTabButton.removeAtIndex(index)
-                    break
-                }
-                index++
-            }
-            changeDeleteButtonStatus(self.removeButton, back: true)
-            reorganizeMainTabButton(self.mainTabButton)
-        } else {
-            println("show it on top")
-            
-        }
-    }
-    
     func addMainTabButton() {
         for item in mainTabButton {
             self.scrollView.addSubview(item)
@@ -943,10 +1114,24 @@ class ViewController: UIViewController{
     
     func pressPreviousButton(sender: UIButton) {
         println("press Previous Button")
+        if self.allTabsOnMusicLine.count > 1 {
+            self.allTabsOnMusicLine.last?.tab.removeFromSuperview()
+            self.allTabsOnMusicLine.removeLast()
+            var previousTime = self.allTabsOnMusicLine.last?.time
+            self.player.currentTime = previousTime!
+        } else if self.allTabsOnMusicLine.count == 1 {
+            self.allTabsOnMusicLine.last?.tab.removeFromSuperview()
+            self.allTabsOnMusicLine.removeLast()
+            self.player.currentTime = 0
+        }else {
+            self.player.currentTime = 0
+        }
+        
     }
     
     func pressPreviewButton(sender: UIButton) {
         println("press Preview Button")
+        
     }
     
     // delete tabs
@@ -978,13 +1163,14 @@ class ViewController: UIViewController{
             removeEditFingerButton()
         }
     }
+    
     func changeDeleteButtonStatus(sender: UIButton, back: Bool) {
         if back == false {
-            sender.backgroundColor = UIColor.redColor().colorWithAlphaComponent(0.4)
+            sender.backgroundColor = UIColor.blueColor().colorWithAlphaComponent(0.4)
             self.mainStatusTitle.text = "Delete Tab"
             deleteButtonPressed = true
         } else {
-            sender.backgroundColor = UIColor.grayColor().colorWithAlphaComponent(0.4)
+            sender.backgroundColor = UIColor.clearColor()
             //removeAllDeleteButton()
             if editAvaliable == true {
                 self.mainStatusTitle.text = "Add New Tab"
@@ -998,19 +1184,71 @@ class ViewController: UIViewController{
     // for music view
     struct tabOnMusicLine {
         var tab: UIView = UIView()
-        var time: Float = Float()
+        var time: NSTimeInterval = NSTimeInterval()
     }
     
-    func createTabOnMusicLine(sender: Float) {
+    var allTabsOnMusicLine: [tabOnMusicLine] = [tabOnMusicLine]()
+    
+    func createTabOnMusicLine(sender: UIButton, time: Float) {
         var tabX = 0.667 * self.trueWidth
         var tabY = 0.3 * self.trueHeight
         var tabWidth = 0.08 * self.trueHeight
         var tabHeight = 0.09 * self.trueHeight
         var tempTab: UIView = UIView()
+        var name = sender.titleLabel?.text
         tempTab.frame = CGRectMake(tabX, tabY, tabWidth, tabHeight)
-        
     }
     
+    func createSoundWave() {
+        let filename: String = "rainbow.mp3"
+        let frame = CGRectMake(0.667 * self.trueWidth, 0, 4 * self.trueWidth, 0.4 * self.trueHeight)
+        self.progressBlock = SoundWaveView(frame: frame)
+        let url = NSURL(fileURLWithPath: NSBundle.mainBundle().pathForResource("rainbow", ofType: "mp3")!)
+        self.progressBlock.SetSoundURL(url!)
+    }
+    
+    func pressMainTabButton(sender: UIButton) {
+        println("press main tab button")
+        if deleteButtonPressed == true {
+            println("delete this button")
+            var index = 0
+            for item in self.mainTabButton {
+                if item == sender {
+                    item.removeFromSuperview()
+                    mainTabButton.removeAtIndex(index)
+                    break
+                }
+                index++
+            }
+            changeDeleteButtonStatus(self.removeButton, back: true)
+            reorganizeMainTabButton(self.mainTabButton)
+        } else {
+            println("show it on top")
+            var tempView: UIView = UIView()
+            tempView.frame = CGRectMake(0 + CGFloat(self.currentTime / self.duration) * (self.progressBlock.frame.width), self.progressBlock.frame.height / 2, 0.0225 * self.trueHeight, 0.175 * self.trueHeight)
+            tempView.backgroundColor = UIColor.grayColor().colorWithAlphaComponent(0.4)
+            tempView.layer.cornerRadius = 2
+            var tempStruct: tabOnMusicLine = tabOnMusicLine()
+            var name = sender.titleLabel?.text
+            var number = count(name!)
+            for var i = 0; i < number; i = i + 2 {
+                var index = advance(name!.startIndex, i + 1)
+                name?.insert("\n", atIndex: index)
+            }
+            var tempLabelView: UILabel = UILabel()
+            tempLabelView.frame = CGRectMake(0, 0, tempView.frame.width, tempView.frame.height)
+            tempLabelView.layer.cornerRadius = 2
+            tempLabelView.font = UIFont.systemFontOfSize(11)
+            tempLabelView.textAlignment = NSTextAlignment.Center
+            tempLabelView.numberOfLines = 3
+            tempLabelView.text = name
+            tempView.addSubview(tempLabelView)
+            tempStruct.tab = tempView
+            tempStruct.time = self.currentTime
+            self.allTabsOnMusicLine.append(tempStruct)
+            self.progressBlock.addSubview(tempView)
+        }
+    }
     
 //    func pressRemoveButton(sender: UIButton) {
 //        println("press Remove Button")
